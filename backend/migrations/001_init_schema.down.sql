@@ -1,0 +1,13 @@
+-- 001_init_schema.down.sql
+-- Rollback: Drop all tables
+
+DROP TABLE IF EXISTS refresh_tokens CASCADE;
+DROP TABLE IF EXISTS reading_progress CASCADE;
+DROP TABLE IF EXISTS flashcard_reviews CASCADE;
+DROP TABLE IF EXISTS user_vocabulary CASCADE;
+DROP TABLE IF EXISTS vocabulary_entries CASCADE;
+DROP TABLE IF EXISTS chapters CASCADE;
+DROP TABLE IF EXISTS story_genres CASCADE;
+DROP TABLE IF EXISTS stories CASCADE;
+DROP TABLE IF EXISTS genres CASCADE;
+DROP TABLE IF EXISTS users CASCADE;

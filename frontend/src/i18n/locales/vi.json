@@ -1,0 +1,98 @@
+{
+  "app": {
+    "name": "GOLingo",
+    "tagline": "Học tiếng Anh qua truyện",
+    "description": "Đọc truyện, lưu từ vựng, luyện tập flashcard và theo dõi tiến độ học tập."
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "stories": "Truyện",
+    "vocabulary": "Từ vựng",
+    "flashcard": "Flashcard",
+    "progress": "Tiến độ",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "admin": "Quản trị"
+  },
+  "home": {
+    "hero_title": "Chinh phục tiếng Anh qua truyện",
+    "hero_subtitle": "Đọc những câu chuyện hấp dẫn, khám phá từ mới trong ngữ cảnh, và xây dựng vốn từ vựng bền vững với phương pháp lặp lại ngắt quãng.",
+    "cta_start": "Bắt đầu đọc",
+    "cta_browse": "Khám phá truyện",
+    "feature_read": "Đọc truyện",
+    "feature_read_desc": "Khám phá thư viện truyện được chọn lọc ở mọi cấp độ khó.",
+    "feature_vocab": "Xây dựng từ vựng",
+    "feature_vocab_desc": "Chạm vào từ bất kỳ để lưu lại cùng ngữ cảnh. Ôn tập với flashcard thông minh.",
+    "feature_progress": "Theo dõi tiến độ",
+    "feature_progress_desc": "Trực quan hóa hành trình học tập với chuỗi ngày, thống kê và mức độ thành thạo."
+  },
+  "auth": {
+    "login_title": "Chào mừng trở lại",
+    "login_subtitle": "Đăng nhập để tiếp tục hành trình học tập",
+    "register_title": "Tạo tài khoản",
+    "register_subtitle": "Tham gia GOLingo và bắt đầu học tiếng Anh qua truyện",
+    "email": "Email",
+    "username": "Tên người dùng",
+    "password": "Mật khẩu",
+    "confirm_password": "Xác nhận mật khẩu",
+    "or_continue_with": "Hoặc tiếp tục với",
+    "google": "Google",
+    "no_account": "Chưa có tài khoản?",
+    "has_account": "Đã có tài khoản?",
+    "forgot_password": "Quên mật khẩu?"
+  },
+  "stories": {
+    "title": "Truyện",
+    "search_placeholder": "Tìm kiếm truyện...",
+    "filter_all": "Tất cả",
+    "filter_beginner": "Cơ bản",
+    "filter_intermediate": "Trung cấp",
+    "filter_advanced": "Nâng cao",
+    "chapters": "chương",
+    "by": "tác giả",
+    "read_now": "Đọc ngay",
+    "continue_reading": "Đọc tiếp"
+  },
+  "vocabulary": {
+    "title": "Từ vựng của tôi",
+    "words_saved": "Từ đã lưu",
+    "due_today": "Cần ôn hôm nay",
+    "search_placeholder": "Tìm kiếm từ...",
+    "no_words": "Chưa có từ nào. Bắt đầu đọc truyện để xây dựng vốn từ vựng!",
+    "context": "Ngữ cảnh",
+    "note": "Ghi chú",
+    "delete_confirm": "Bạn có chắc muốn xóa từ này?"
+  },
+  "flashcard": {
+    "title": "Luyện tập Flashcard",
+    "show_answer": "Xem đáp án",
+    "again": "Lại",
+    "hard": "Khó",
+    "good": "Tốt",
+    "easy": "Dễ",
+    "session_complete": "Tuyệt vời! Bạn đã hoàn thành bài ôn tập hôm nay.",
+    "no_cards": "Không có thẻ nào cần ôn. Hãy quay lại sau!",
+    "cards_remaining": "thẻ còn lại"
+  },
+  "progress": {
+    "title": "Tiến độ học tập",
+    "streak": "Chuỗi ngày",
+    "words_learned": "Từ đã học",
+    "chapters_read": "Chương đã đọc",
+    "reviews_today": "Ôn tập hôm nay"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Đã xảy ra lỗi",
+    "retry": "Thử lại",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "previous": "Trước"
+  }
+}

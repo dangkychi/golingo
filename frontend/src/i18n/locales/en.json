@@ -1,0 +1,98 @@
+{
+  "app": {
+    "name": "GOLingo",
+    "tagline": "Learn English through stories",
+    "description": "Read stories, save vocabulary, practice with flashcards, and track your learning progress."
+  },
+  "nav": {
+    "home": "Home",
+    "stories": "Stories",
+    "vocabulary": "Vocabulary",
+    "flashcard": "Flashcard",
+    "progress": "Progress",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "admin": "Admin"
+  },
+  "home": {
+    "hero_title": "Master English Through Stories",
+    "hero_subtitle": "Read captivating stories, discover new words in context, and build lasting vocabulary with spaced repetition.",
+    "cta_start": "Start Reading",
+    "cta_browse": "Browse Stories",
+    "feature_read": "Read Stories",
+    "feature_read_desc": "Explore a curated library of stories at every difficulty level.",
+    "feature_vocab": "Build Vocabulary",
+    "feature_vocab_desc": "Tap any word to save it with context. Review with smart flashcards.",
+    "feature_progress": "Track Progress",
+    "feature_progress_desc": "Visualize your learning journey with streaks, stats, and mastery levels."
+  },
+  "auth": {
+    "login_title": "Welcome back",
+    "login_subtitle": "Sign in to continue your learning journey",
+    "register_title": "Create an account",
+    "register_subtitle": "Join GOLingo and start learning English through stories",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "or_continue_with": "Or continue with",
+    "google": "Google",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?",
+    "forgot_password": "Forgot password?"
+  },
+  "stories": {
+    "title": "Stories",
+    "search_placeholder": "Search stories...",
+    "filter_all": "All",
+    "filter_beginner": "Beginner",
+    "filter_intermediate": "Intermediate",
+    "filter_advanced": "Advanced",
+    "chapters": "chapters",
+    "by": "by",
+    "read_now": "Read Now",
+    "continue_reading": "Continue Reading"
+  },
+  "vocabulary": {
+    "title": "My Vocabulary",
+    "words_saved": "Words Saved",
+    "due_today": "Due Today",
+    "search_placeholder": "Search your words...",
+    "no_words": "No words saved yet. Start reading stories to build your vocabulary!",
+    "context": "Context",
+    "note": "Note",
+    "delete_confirm": "Are you sure you want to delete this word?"
+  },
+  "flashcard": {
+    "title": "Flashcard Practice",
+    "show_answer": "Show Answer",
+    "again": "Again",
+    "hard": "Hard",
+    "good": "Good",
+    "easy": "Easy",
+    "session_complete": "Great job! You've completed today's review.",
+    "no_cards": "No cards due for review. Come back later!",
+    "cards_remaining": "cards remaining"
+  },
+  "progress": {
+    "title": "Learning Progress",
+    "streak": "Day Streak",
+    "words_learned": "Words Learned",
+    "chapters_read": "Chapters Read",
+    "reviews_today": "Reviews Today"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}
