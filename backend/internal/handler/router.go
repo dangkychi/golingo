@@ -2,11 +2,11 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/golingo/backend/internal/config"
-	"github.com/golingo/backend/internal/middleware"
+	"github.com/dangkychi/GOLingo/internal/config"
+	"github.com/dangkychi/GOLingo/internal/middleware"
 )
 
-func SetupRouter(cfg *config.Config) *gin.Engine {
+func SetupRouter(cfg *config.Config, authHandler *AuthHandler) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -26,13 +26,16 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 		// Auth routes (public)
 		auth := v1.Group("/auth")
 		{
-			auth.POST("/register", placeholderHandler("register"))
-			auth.POST("/login", placeholderHandler("login"))
-			auth.POST("/google", placeholderHandler("google_login"))
-			auth.POST("/refresh", placeholderHandler("refresh_token"))
-			auth.POST("/logout", placeholderHandler("logout"))
+			auth.POST("/register", authHandler.Register)
+			auth.POST("/login", authHandler.Login)
+			auth.POST("/google", authHandler.GoogleLogin)
+			auth.POST("/refresh", authHandler.Refresh)
+			auth.POST("/logout", authHandler.Logout)
 			auth.POST("/forgot-password", placeholderHandler("forgot_password"))
 			auth.POST("/reset-password", placeholderHandler("reset_password"))
+			
+			// Protected auth route
+			auth.GET("/me", middleware.AuthMiddleware(cfg), authHandler.GetMe)
 		}
 
 		// 2FA routes (authenticated)

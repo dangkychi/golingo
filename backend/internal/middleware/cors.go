@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/golingo/backend/internal/config"
+	"github.com/dangkychi/GOLingo/internal/config"
 )
 
 func CORSMiddleware(cfg *config.Config) gin.HandlerFunc {

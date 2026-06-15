@@ -1,18 +1,33 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
+import { authAPI } from '../api/auth';
 import './Navbar.css';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
   const { isAuthenticated, user, logout } = useAuthStore();
 
   const toggleLanguage = () => {
     const next = i18n.language === 'en' ? 'vi' : 'en';
     i18n.changeLanguage(next);
+  };
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      try {
+        await authAPI.logout(refreshToken);
+      } catch {
+        // Even if API fails, still clear local state
+      }
+    }
+    logout();
+    navigate('/login');
   };
 
   const navLinks = [
@@ -75,7 +90,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <div className="navbar-user">
               <span className="navbar-username">{user?.username}</span>
-              <button className="btn btn-ghost btn-sm" onClick={logout} id="logout-btn">
+              <button className="btn btn-ghost btn-sm" onClick={handleLogout} id="logout-btn">
                 {t('nav.logout')}
               </button>
             </div>
@@ -94,3 +109,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
