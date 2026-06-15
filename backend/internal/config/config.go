@@ -19,9 +19,10 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Env    string
-	Port   string
-	Secret string
+	Env         string
+	Port        string
+	Secret      string
+	LogFilePath string
 }
 
 type DBConfig struct {
@@ -90,9 +91,10 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		App: AppConfig{
-			Env:    getEnv("APP_ENV", "development"),
-			Port:   getEnv("APP_PORT", "8080"),
-			Secret: getEnv("APP_SECRET", "change-me-in-production"),
+			Env:         getEnv("APP_ENV", "development"),
+			Port:        getEnv("APP_PORT", "8080"),
+			Secret:      getEnv("APP_SECRET", "change-me-in-production"),
+			LogFilePath: getEnv("LOG_FILE_PATH", "logs/app.log"),
 		},
 		DB: DBConfig{
 			Host:     getEnv("DB_HOST", "localhost"),

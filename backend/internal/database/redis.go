@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/golingo/backend/internal/config"
+	"github.com/dangkychi/GOLingo/internal/config"
 	"github.com/redis/go-redis/v9"
 )
 

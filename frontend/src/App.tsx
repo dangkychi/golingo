@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import { useUIStore } from './store/uiStore';
+import { useAuthStore } from './store/authStore';
+import { authAPI } from './api/auth';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,10 +24,34 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const { theme } = useUIStore();
+  const { setUser, setLoading, isLoading } = useAuthStore();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        try {
+          const { data } = await authAPI.getMe();
+          setUser(data.user);
+        } catch {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    };
+
+    initAuth();
+  }, [setUser, setLoading]);
+
+  if (isLoading) {
+    return <div className="app-loading">Loading...</div>;
+  }
 
   return (
     <BrowserRouter>

@@ -41,7 +41,11 @@
     "google": "Google",
     "no_account": "Don't have an account?",
     "has_account": "Already have an account?",
-    "forgot_password": "Forgot password?"
+    "forgot_password": "Forgot password?",
+    "email_or_username": "Email or Username",
+    "password_mismatch": "Passwords do not match",
+    "password_too_short": "Password must be at least 6 characters",
+    "register_success": "Account created successfully! Please sign in."
   },
   "stories": {
     "title": "Stories",

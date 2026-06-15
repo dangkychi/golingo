@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golingo/backend/internal/config"
-	"github.com/golingo/backend/internal/pkg/jwt"
+	"github.com/dangkychi/GOLingo/internal/config"
+	"github.com/dangkychi/GOLingo/internal/pkg/jwt"
 )
 
 func AuthMiddleware(cfg *config.Config) gin.HandlerFunc {

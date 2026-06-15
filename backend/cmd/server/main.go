@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/golingo/backend/internal/config"
-	"github.com/golingo/backend/internal/database"
-	"github.com/golingo/backend/internal/handler"
+	"github.com/dangkychi/GOLingo/internal/config"
+	"github.com/dangkychi/GOLingo/internal/database"
+	"github.com/dangkychi/GOLingo/internal/handler"
+	"github.com/dangkychi/GOLingo/internal/pkg/logger"
+	"github.com/dangkychi/GOLingo/internal/repository"
+	"github.com/dangkychi/GOLingo/internal/service"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -16,42 +20,63 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
+	// Initialize logger (Console & File output)
+	appLogger, err := logger.InitLogger(cfg.App.Env, cfg.App.LogFilePath)
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer func() {
+		_ = appLogger.Sync()
+	}()
+
+	appLogger.Info("Initializing GOLingo services...")
+
 	// Connect to PostgreSQL
 	db, err := database.NewPostgresDB(cfg.DB)
 	if err != nil {
-		log.Printf("⚠ PostgreSQL not available: %v", err)
-		log.Println("  Server will start without database connection.")
-		log.Println("  Make sure PostgreSQL is running (docker-compose up postgres)")
+		appLogger.Fatal("PostgreSQL connection failed", zap.Error(err))
+	}
+
+	// Run raw SQL migrations (tạo schema & seed genres)
+	if err := database.RunSQLMigrations(cfg.DB, "migrations"); err != nil {
+		appLogger.Error("SQL migrations failed", zap.Error(err))
 	} else {
-		// Auto migrate models
-		if err := database.AutoMigrate(db); err != nil {
-			log.Printf("⚠ Auto migration failed: %v", err)
-		} else {
-			log.Println("✓ Database migration completed")
-		}
-		_ = db // will be used by repositories later
+		appLogger.Info("Database SQL migrations completed successfully")
 	}
 
 	// Connect to Redis (optional in dev)
 	redisClient, err := database.NewRedisClient(cfg.Redis)
 	if err != nil {
-		log.Printf("⚠ Redis not available: %v", err)
-		log.Println("  Server will start without Redis cache.")
+		appLogger.Warn("Redis not available. Server will start without Redis cache.", zap.Error(err))
 	} else {
 		_ = redisClient // will be used by services later
 	}
 
+	// Initialize repositories
+	userRepo := repository.NewUserRepository(db)
+	tokenRepo := repository.NewRefreshTokenRepository(db)
+
+	// Initialize services
+	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
+
+	// Initialize handlers
+	authHandler := handler.NewAuthHandler(authService)
+
 	// Setup router
-	router := handler.SetupRouter(cfg)
+	router := handler.SetupRouter(cfg, authHandler)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.App.Port)
-	log.Printf("🚀 GOLingo API server starting on %s", addr)
-	log.Printf("   Environment: %s", cfg.App.Env)
-	log.Printf("   Health: http://localhost:%s/health", cfg.App.Port)
-	log.Printf("   API:    http://localhost:%s/api/v1", cfg.App.Port)
+	appLogger.Info("🚀 GOLingo API server starting",
+		zap.String("addr", addr),
+		zap.String("env", cfg.App.Env),
+		zap.String("health", fmt.Sprintf("http://localhost:%s/health", cfg.App.Port)),
+		zap.String("api", fmt.Sprintf("http://localhost:%s/api/v1", cfg.App.Port)),
+	)
 
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		appLogger.Fatal("Failed to start server", zap.Error(err))
 	}
 }
+
+
