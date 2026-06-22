@@ -1,76 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { storiesAPI, type Story, type Genre } from '../api/stories';
 import './Stories.css';
-
-// Mock data for now — will be replaced with API calls
-const mockStories = [
-  {
-    id: '1',
-    title: 'The Little Prince',
-    author: 'Antoine de Saint-Exupéry',
-    slug: 'the-little-prince',
-    description: 'A pilot stranded in the desert meets a young prince who has fallen to Earth from a tiny asteroid.',
-    difficulty: 'beginner',
-    cover_url: null,
-    chapters: 12,
-    genres: ['Fiction', 'Fantasy'],
-  },
-  {
-    id: '2',
-    title: 'Sherlock Holmes: A Study in Scarlet',
-    author: 'Arthur Conan Doyle',
-    slug: 'sherlock-holmes-study-in-scarlet',
-    description: 'Dr. Watson meets Sherlock Holmes and they investigate a mysterious murder together.',
-    difficulty: 'intermediate',
-    cover_url: null,
-    chapters: 14,
-    genres: ['Mystery', 'Fiction'],
-  },
-  {
-    id: '3',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    slug: 'the-great-gatsby',
-    description: 'A mysterious millionaire and his obsessive love story set in the Jazz Age of 1920s America.',
-    difficulty: 'advanced',
-    cover_url: null,
-    chapters: 9,
-    genres: ['Fiction', 'Romance'],
-  },
-  {
-    id: '4',
-    title: 'Alice in Wonderland',
-    author: 'Lewis Carroll',
-    slug: 'alice-in-wonderland',
-    description: 'Alice falls through a rabbit hole into a fantastical underground world.',
-    difficulty: 'beginner',
-    cover_url: null,
-    chapters: 12,
-    genres: ['Fantasy', 'Children'],
-  },
-  {
-    id: '5',
-    title: '1984',
-    author: 'George Orwell',
-    slug: '1984',
-    description: 'A dystopian novel set in a totalitarian society ruled by Big Brother.',
-    difficulty: 'advanced',
-    cover_url: null,
-    chapters: 23,
-    genres: ['Science Fiction', 'Fiction'],
-  },
-  {
-    id: '6',
-    title: 'The Old Man and the Sea',
-    author: 'Ernest Hemingway',
-    slug: 'the-old-man-and-the-sea',
-    description: 'An aging fisherman struggles with a giant marlin far out in the Gulf Stream.',
-    difficulty: 'intermediate',
-    cover_url: null,
-    chapters: 1,
-    genres: ['Fiction', 'Adventure'],
-  },
-];
 
 type Difficulty = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
@@ -84,14 +16,37 @@ export default function Stories() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('all');
+  const [stories, setStories] = useState<Story[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const pageSize = 12;
 
-  const filtered = mockStories.filter((s) => {
-    const matchSearch =
-      s.title.toLowerCase().includes(search.toLowerCase()) ||
-      s.author.toLowerCase().includes(search.toLowerCase());
-    const matchDiff = difficulty === 'all' || s.difficulty === difficulty;
-    return matchSearch && matchDiff;
-  });
+  useEffect(() => {
+    storiesAPI.getGenres().then(({ data }) => setGenres(data.genres || []));
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    storiesAPI
+      .list({
+        search: search || undefined,
+        difficulty: difficulty === 'all' ? undefined : difficulty,
+        genre: selectedGenre || undefined,
+        page,
+        page_size: pageSize,
+      })
+      .then(({ data }) => {
+        setStories(data.stories || []);
+        setTotal(data.total);
+      })
+      .catch(() => setStories([]))
+      .finally(() => setLoading(false));
+  }, [search, difficulty, selectedGenre, page]);
+
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="page container animate-fade-in" id="stories-page">
@@ -106,7 +61,7 @@ export default function Stories() {
           type="text"
           placeholder={t('stories.search_placeholder')}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           id="stories-search"
         />
         <div className="difficulty-tabs">
@@ -114,57 +69,105 @@ export default function Stories() {
             <button
               key={d}
               className={`difficulty-tab ${difficulty === d ? 'active' : ''}`}
-              onClick={() => setDifficulty(d)}
+              onClick={() => { setDifficulty(d); setPage(1); }}
             >
               {t(`stories.filter_${d}`)}
             </button>
           ))}
         </div>
+        {genres.length > 0 && (
+          <select
+            className="input stories-genre-select"
+            value={selectedGenre}
+            onChange={(e) => { setSelectedGenre(e.target.value); setPage(1); }}
+          >
+            <option value="">All Genres</option>
+            {genres.map((g) => (
+              <option key={g.id} value={g.slug}>{g.name}</option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="stories-loading">
+          <p>Loading stories...</p>
+        </div>
+      )}
 
       {/* Story Grid */}
-      <div className="stories-grid" id="stories-grid">
-        {filtered.map((story, i) => (
-          <article
-            key={story.id}
-            className="story-card card animate-fade-in"
-            style={{ animationDelay: `${i * 0.05}s` }}
-          >
-            <div className="story-cover">
-              <div className="story-cover-placeholder">
-                <span>📖</span>
+      {!loading && (
+        <div className="stories-grid" id="stories-grid">
+          {stories.map((story, i) => (
+            <Link
+              key={story.id}
+              to={`/stories/${story.slug}`}
+              className="story-card card animate-fade-in"
+              style={{ animationDelay: `${i * 0.05}s` }}
+            >
+              <div className="story-cover">
+                {story.cover_url ? (
+                  <img src={story.cover_url} alt={story.title} className="story-cover-img" />
+                ) : (
+                  <div className="story-cover-placeholder">
+                    <span>📖</span>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="story-info">
-              <div className="story-meta">
-                <span className={`badge ${difficultyColors[story.difficulty]}`}>
-                  {story.difficulty}
-                </span>
-                <span className="story-chapters">
-                  {story.chapters} {t('stories.chapters')}
-                </span>
+              <div className="story-info">
+                <div className="story-meta">
+                  <span className={`badge ${difficultyColors[story.difficulty]}`}>
+                    {story.difficulty}
+                  </span>
+                </div>
+                <h3 className="story-title">{story.title}</h3>
+                {story.author && (
+                  <p className="story-author">
+                    {t('stories.by')} {story.author}
+                  </p>
+                )}
+                {story.description && (
+                  <p className="story-desc">{story.description}</p>
+                )}
+                <div className="story-genres">
+                  {story.genres?.map((g) => (
+                    <span key={g.id} className="genre-tag">{g.name}</span>
+                  ))}
+                </div>
               </div>
-              <h3 className="story-title">{story.title}</h3>
-              <p className="story-author">
-                {t('stories.by')} {story.author}
-              </p>
-              <p className="story-desc">{story.description}</p>
-              <div className="story-genres">
-                {story.genres.map((g) => (
-                  <span key={g} className="genre-tag">{g}</span>
-                ))}
-              </div>
-              <button className="btn btn-primary story-read-btn">
-                {t('stories.read_now')}
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
-      {filtered.length === 0 && (
+      {/* Empty state */}
+      {!loading && stories.length === 0 && (
         <div className="stories-empty">
           <p>No stories found matching your criteria.</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="stories-pagination">
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            ← Previous
+          </button>
+          <span className="pagination-info">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Next →
+          </button>
         </div>
       )}
     </div>

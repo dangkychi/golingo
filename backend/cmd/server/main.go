@@ -55,15 +55,23 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	tokenRepo := repository.NewRefreshTokenRepository(db)
+	storyRepo := repository.NewStoryRepository(db)
+	chapterRepo := repository.NewChapterRepository(db)
+	genreRepo := repository.NewGenreRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
+	userService := service.NewUserService(userRepo)
+	storyService := service.NewStoryService(storyRepo, chapterRepo, genreRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
+	storyHandler := handler.NewStoryHandler(storyService)
+	adminHandler := handler.NewAdminHandler(userRepo, storyRepo, chapterRepo)
 
 	// Setup router
-	router := handler.SetupRouter(cfg, authHandler)
+	router := handler.SetupRouter(cfg, authHandler, userHandler, storyHandler, adminHandler)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.App.Port)

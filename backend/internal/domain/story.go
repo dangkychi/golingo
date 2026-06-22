@@ -37,6 +37,7 @@ type Story struct {
 	Difficulty  Difficulty  `json:"difficulty" gorm:"size:20;default:'intermediate'"`
 	Status      StoryStatus `json:"status" gorm:"size:20;default:'ongoing'"`
 	CreatedBy   *uuid.UUID  `json:"created_by" gorm:"type:uuid"`
+	GutenbergID *int        `json:"gutenberg_id" gorm:"uniqueIndex;default:null"`
 	CreatedAt   time.Time   `json:"created_at" gorm:"not null;default:now()"`
 	UpdatedAt   time.Time   `json:"updated_at" gorm:"not null;default:now()"`
 

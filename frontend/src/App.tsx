@@ -8,7 +8,19 @@ import Home from './pages/Home';
 import Stories from './pages/Stories';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
+import StoryDetail from './pages/StoryDetail';
+import ChapterReader from './pages/ChapterReader';
 import NotFound from './pages/NotFound';
+
+// Admin Imports
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminStories from './pages/admin/AdminStories';
+import AdminStoryForm from './pages/admin/AdminStoryForm';
+import AdminChapters from './pages/admin/AdminChapters';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminGutenbergImport from './pages/admin/AdminGutenbergImport';
 import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
 import { authAPI } from './api/auth';
@@ -60,8 +72,23 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/stories" element={<Stories />} />
+          <Route path="/stories/:slug" element={<StoryDetail />} />
+          <Route path="/stories/:slug/chapters/:num" element={<ChapterReader />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="stories" element={<AdminStories />} />
+            <Route path="stories/new" element={<AdminStoryForm />} />
+            <Route path="stories/:id/edit" element={<AdminStoryForm />} />
+            <Route path="stories/:storyId/chapters" element={<AdminChapters />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="gutenberg" element={<AdminGutenbergImport />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
