@@ -6,7 +6,7 @@ import (
 	"github.com/dangkychi/GOLingo/internal/middleware"
 )
 
-func SetupRouter(cfg *config.Config, authHandler *AuthHandler) *gin.Engine {
+func SetupRouter(cfg *config.Config, authHandler *AuthHandler, userHandler *UserHandler) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -61,6 +61,13 @@ func SetupRouter(cfg *config.Config, authHandler *AuthHandler) *gin.Engine {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware(cfg))
 		{
+			// Users
+			users := protected.Group("/users")
+			{
+				users.PUT("/profile", userHandler.UpdateProfile)
+				users.PUT("/password", userHandler.UpdatePassword)
+			}
+
 			// Vocabulary
 			vocab := protected.Group("/vocabulary")
 			{

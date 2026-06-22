@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../store/uiStore';
@@ -11,6 +12,21 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
   const { isAuthenticated, user, logout } = useAuthStore();
+  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleLanguage = () => {
     const next = i18n.language === 'en' ? 'vi' : 'en';
@@ -88,11 +104,43 @@ export default function Navbar() {
 
           {/* Auth */}
           {isAuthenticated ? (
-            <div className="navbar-user">
-              <span className="navbar-username">{user?.username}</span>
-              <button className="btn btn-ghost btn-sm" onClick={handleLogout} id="logout-btn">
-                {t('nav.logout')}
+            <div className="navbar-user" ref={dropdownRef}>
+              <button 
+                className="navbar-username-btn" 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="avatar" className="navbar-avatar" />
+                ) : (
+                  <div className="navbar-avatar-placeholder">
+                    {user?.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+                <span className="navbar-username">{user?.username}</span>
+                <span className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`}>▼</span>
               </button>
+
+              {isDropdownOpen && (
+                <div className="navbar-dropdown glass animate-slide-up">
+                  <div className="dropdown-header">
+                    <p className="dropdown-email">{user?.email}</p>
+                  </div>
+                  <Link 
+                    to="/profile" 
+                    className="dropdown-item"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Profile Settings
+                  </Link>
+                  <div className="dropdown-divider"></div>
+                  <button 
+                    className="dropdown-item text-danger" 
+                    onClick={handleLogout}
+                  >
+                    {t('nav.logout')}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="navbar-auth">

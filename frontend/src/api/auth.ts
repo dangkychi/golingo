@@ -26,6 +26,15 @@ export interface TokenPair {
   expires_at: string;
 }
 
+export interface UpdateProfilePayload {
+  username: string;
+  avatar_url?: string;
+}
+
+export interface UpdatePasswordPayload {
+  new_password: string;
+}
+
 export interface RegisterResponse {
   message: string;
   user: AuthUser;
@@ -51,4 +60,10 @@ export const authAPI = {
     apiClient.post('/auth/logout', { refresh_token: refreshToken }),
 
   getMe: () => apiClient.get<{ user: AuthUser }>('/auth/me'),
+
+  updateProfile: (data: UpdateProfilePayload) =>
+    apiClient.put<{ message: string; user: AuthUser }>('/users/profile', data),
+
+  updatePassword: (data: UpdatePasswordPayload) =>
+    apiClient.put<{ message: string }>('/users/password', data),
 };

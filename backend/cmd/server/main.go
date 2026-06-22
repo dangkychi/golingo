@@ -58,12 +58,14 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
+	userService := service.NewUserService(userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
 
 	// Setup router
-	router := handler.SetupRouter(cfg, authHandler)
+	router := handler.SetupRouter(cfg, authHandler, userHandler)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.App.Port)

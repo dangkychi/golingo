@@ -1,0 +1,367 @@
+# GOLingo Design System
+
+## Product Context
+
+GOLingo is an English learning platform focused on reading,
+vocabulary acquisition, listening practice, and AI-assisted learning.
+
+The product should feel modern, energetic, and motivating,
+while remaining highly readable for long learning sessions.
+
+---
+
+## Design Philosophy
+
+Use a "Neo Graffiti EdTech" style.
+
+The visual identity combines:
+
+- 70% Modern EdTech
+- 20% Neon Cyber UI
+- 10% Graffiti Street Art
+
+Graffiti elements should be used as accents only.
+
+The UI must remain professional and educational.
+
+Avoid making screens look like a game, nightclub,
+or cyberpunk movie interface.
+
+Readability always has higher priority than visual effects.
+
+---
+
+## Colors
+
+Primary:
+#00E5FF (Neon Cyan)
+
+Secondary:
+#9D4EDD (Neon Purple)
+
+Accent:
+#39FF14 (Neon Green)
+
+Success:
+#22C55E
+
+Warning:
+#F59E0B
+
+Error:
+#EF4444
+
+---
+
+## Background Colors
+
+Dark Mode Primary:
+#111827
+
+Dark Mode Secondary:
+#1F2937
+
+Light Mode Primary:
+#F8FAFC
+
+Light Mode Secondary:
+#FFFFFF
+
+Default preference:
+Dark Mode
+
+---
+
+## Gradients
+
+Primary Gradient:
+
+linear-gradient(
+135deg,
+#00E5FF,
+#9D4EDD
+)
+
+Use gradients only for:
+
+- CTA buttons
+- Hero sections
+- Progress highlights
+- Achievement cards
+
+Do not use gradients on large reading areas.
+
+---
+
+## Typography
+
+Brand Font:
+Bebas Neue
+
+UI Heading Font:
+Outfit
+
+Body Font:
+Inter
+
+Rules:
+
+Typography Hierarchy
+
+Brand Font (Bebas Neue)
+
+Use only for:
+
+- Logo
+- Hero banners
+- Marketing sections
+- Achievement screens
+- XP rewards
+- Streak counters
+- Landing page highlights
+
+Do not use Bebas Neue for:
+
+- Reading pages
+- Vocabulary content
+- Grammar lessons
+- Dashboard widgets
+- Forms
+- Settings pages
+- Long headings
+
+---
+
+UI Heading Font (Outfit)
+
+Use for:
+
+- h1
+- h2
+- h3
+- Dashboard titles
+- Lesson titles
+- Section headers
+- Modal titles
+
+This is the default heading font across the product.
+
+---
+
+Body Font (Inter)
+
+Use for:
+
+- Paragraphs
+- Learning content
+- Reading articles
+- Vocabulary definitions
+- Form labels
+- Buttons
+- Navigation links
+
+Prioritize readability.
+
+---
+
+## Educational First Principle
+
+This is an educational product.
+
+When visual style conflicts with readability,
+learning efficiency always wins.
+
+Never sacrifice usability for aesthetics.
+
+Think like an EdTech product designer,
+not a game designer.
+
+---
+
+## Reading Experience Rules
+
+Reading pages are the highest priority screens.
+
+Requirements:
+
+- Minimal distractions
+- Maximum readability
+- Comfortable line length
+- Comfortable line spacing
+- Clean typography
+
+Avoid:
+
+- Strong gradients
+- Heavy glow effects
+- Graffiti decorations
+- Animated backgrounds
+
+Reading content should feel closer to
+Medium, Kindle, or Notion than a game UI.
+
+---
+
+## Card Style
+
+Use glassmorphism-inspired cards.
+
+Card style:
+
+- subtle blur
+- rounded corners
+- thin neon border
+- soft shadow
+
+Avoid heavy glow effects.
+
+---
+
+## Buttons
+
+Primary Buttons:
+
+Gradient background
+Neon Cyan -> Neon Purple
+
+Hover:
+
+- slight elevation
+- soft glow
+- 200ms transition
+
+Avoid aggressive animations.
+
+---
+
+## Animations
+
+Animation duration:
+
+200ms - 300ms
+
+Use:
+
+- fade
+- slide
+- scale
+
+Avoid:
+
+- bounce
+- shake
+- flashing
+- strobe effects
+
+---
+
+## Reading Pages
+
+Reading pages are the most important screens.
+
+Rules:
+
+- maximum readability
+- large line height
+- clean layout
+- minimal visual distractions
+
+Do not place decorative graffiti elements
+inside reading content.
+
+---
+
+## Vocabulary Pages
+
+Vocabulary cards should feel modern and playful.
+
+Allowed:
+
+- Neon accents
+- XP indicators
+- Progress animations
+
+Not allowed:
+
+- Graffiti text styles
+- Complex backgrounds
+
+---
+
+## Gamification
+
+Use graffiti-inspired visuals only for:
+
+- XP rewards
+- Achievement badges
+- Level up screens
+- Learning streaks
+
+Examples:
+
+LEVEL UP
+VOCAB MASTER
+7 DAY STREAK
+
+These areas may contain stronger graffiti styling.
+
+---
+
+## Layout Rules
+
+Desktop:
+
+Max content width:
+1280px
+
+Reading content:
+700px - 850px
+
+Mobile-first responsive design.
+
+Always provide:
+
+- generous spacing
+- clean hierarchy
+- clear CTA placement
+
+---
+
+## Accessibility
+
+Minimum contrast ratio:
+WCAG AA
+
+Never sacrifice readability
+for visual style.
+
+All text must remain easy to read.
+
+---
+
+## UI Inspirations
+
+Primary references:
+
+- Duolingo
+- Spotify
+- Notion
+- Linear
+
+Avoid copying designs directly.
+
+Use them only as inspiration.
+
+---
+
+## Agent Instructions
+
+When generating UI:
+
+1. Prioritize learning efficiency.
+2. Prioritize readability.
+3. Use neon accents sparingly.
+4. Use graffiti elements only as highlights.
+5. Keep interfaces clean and modern.
+6. Think like an EdTech designer, not a game designer.
+7. Every screen should feel calm, cool, and motivating.
