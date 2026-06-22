@@ -6,7 +6,13 @@ import (
 	"github.com/dangkychi/GOLingo/internal/middleware"
 )
 
-func SetupRouter(cfg *config.Config, authHandler *AuthHandler, userHandler *UserHandler) *gin.Engine {
+func SetupRouter(
+	cfg *config.Config,
+	authHandler *AuthHandler,
+	userHandler *UserHandler,
+	storyHandler *StoryHandler,
+	adminHandler *AdminHandler,
+) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -20,9 +26,13 @@ func SetupRouter(cfg *config.Config, authHandler *AuthHandler, userHandler *User
 	healthHandler := NewHealthHandler()
 	r.GET("/health", healthHandler.HealthCheck)
 
+	logHandler := NewLogHandler()
+
 	// API v1 routes
 	v1 := r.Group("/api/v1")
 	{
+		// Client log endpoint (public, so frontend can log boot errors)
+		v1.POST("/logs/error", logHandler.LogClientError)
 		// Auth routes (public)
 		auth := v1.Group("/auth")
 		{
@@ -51,11 +61,14 @@ func SetupRouter(cfg *config.Config, authHandler *AuthHandler, userHandler *User
 		stories := v1.Group("/stories")
 		stories.Use(middleware.OptionalAuthMiddleware(cfg))
 		{
-			stories.GET("", placeholderHandler("list_stories"))
-			stories.GET("/:slug", placeholderHandler("get_story"))
-			stories.GET("/:slug/chapters", placeholderHandler("list_chapters"))
-			stories.GET("/:slug/chapters/:num", placeholderHandler("get_chapter"))
+			stories.GET("", storyHandler.ListStories)
+			stories.GET("/:slug", storyHandler.GetStory)
+			stories.GET("/:slug/chapters", storyHandler.ListChapters)
+			stories.GET("/:slug/chapters/:num", storyHandler.GetChapter)
 		}
+
+		// Genres (public)
+		v1.GET("/genres", storyHandler.ListGenres)
 
 		// Protected routes (authenticated)
 		protected := v1.Group("")
@@ -109,27 +122,35 @@ func SetupRouter(cfg *config.Config, authHandler *AuthHandler, userHandler *User
 			}
 		}
 
-		// Admin routes
+		// Editor/Admin routes (story management)
+		editor := v1.Group("/admin")
+		editor.Use(middleware.AuthMiddleware(cfg))
+		editor.Use(middleware.EditorOrAdminMiddleware())
+		{
+			// Story CRUD
+			editor.GET("/stories/:id", storyHandler.AdminGetStory)
+			editor.POST("/stories", storyHandler.AdminCreateStory)
+			editor.PUT("/stories/:id", storyHandler.AdminUpdateStory)
+			editor.DELETE("/stories/:id", storyHandler.AdminDeleteStory)
+
+			// Chapter CRUD
+			editor.POST("/stories/:id/chapters", storyHandler.AdminCreateChapter)
+			editor.PUT("/chapters/:id", storyHandler.AdminUpdateChapter)
+			editor.DELETE("/chapters/:id", storyHandler.AdminDeleteChapter)
+
+			// Gutenberg import
+			editor.GET("/gutenberg/search", storyHandler.SearchGutenberg)
+			editor.POST("/gutenberg/import", storyHandler.ImportGutenberg)
+		}
+
+		// Admin-only routes (user management, dashboard)
 		admin := v1.Group("/admin")
 		admin.Use(middleware.AuthMiddleware(cfg))
 		admin.Use(middleware.AdminMiddleware())
 		{
-			// Admin stories
-			admin.POST("/stories", placeholderHandler("admin_create_story"))
-			admin.PUT("/stories/:id", placeholderHandler("admin_update_story"))
-			admin.DELETE("/stories/:id", placeholderHandler("admin_delete_story"))
-
-			// Admin chapters
-			admin.POST("/stories/:id/chapters", placeholderHandler("admin_create_chapter"))
-			admin.PUT("/chapters/:id", placeholderHandler("admin_update_chapter"))
-			admin.DELETE("/chapters/:id", placeholderHandler("admin_delete_chapter"))
-
-			// Admin users
-			admin.GET("/users", placeholderHandler("admin_list_users"))
-			admin.PUT("/users/:id/ban", placeholderHandler("admin_ban_user"))
-
-			// Admin dashboard
-			admin.GET("/dashboard", placeholderHandler("admin_dashboard"))
+			admin.GET("/dashboard", adminHandler.Dashboard)
+			admin.GET("/users", adminHandler.ListUsers)
+			admin.PUT("/users/:id/ban", adminHandler.ToggleBanUser)
 		}
 	}
 

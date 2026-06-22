@@ -9,8 +9,9 @@ import (
 type UserRole string
 
 const (
-	RoleUser  UserRole = "user"
-	RoleAdmin UserRole = "admin"
+	RoleUser   UserRole = "user"
+	RoleEditor UserRole = "editor"
+	RoleAdmin  UserRole = "admin"
 )
 
 type User struct {

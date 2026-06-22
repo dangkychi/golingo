@@ -54,6 +54,26 @@ func AdminMiddleware() gin.HandlerFunc {
 	}
 }
 
+func EditorOrAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, exists := c.Get("user_role")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": "Insufficient permissions",
+			})
+			return
+		}
+		roleStr, _ := role.(string)
+		if roleStr != "admin" && roleStr != "editor" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": "Editor or Admin access required",
+			})
+			return
+		}
+		c.Next()
+	}
+}
+
 func OptionalAuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
