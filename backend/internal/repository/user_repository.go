@@ -14,6 +14,8 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 	GetByUsername(ctx context.Context, username string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
+	CountAll(ctx context.Context) (int64, error)
+	ListAll(ctx context.Context, search string, page, pageSize int) ([]domain.User, int64, error)
 }
 
 type userRepository struct {
@@ -54,4 +56,41 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*d
 
 func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
 	return r.db.WithContext(ctx).Save(user).Error
+}
+
+func (r *userRepository) CountAll(ctx context.Context) (int64, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&domain.User{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *userRepository) ListAll(ctx context.Context, search string, page, pageSize int) ([]domain.User, int64, error) {
+	query := r.db.WithContext(ctx).Model(&domain.User{})
+
+	if search != "" {
+		s := "%" + search + "%"
+		query = query.Where("username ILIKE ? OR email ILIKE ?", s, s)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var users []domain.User
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
 }

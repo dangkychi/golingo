@@ -125,6 +125,18 @@ export default function Navbar() {
                   <div className="dropdown-header">
                     <p className="dropdown-email">{user?.email}</p>
                   </div>
+                  {(user?.role === 'admin' || user?.role === 'editor') && (
+                    <>
+                      <Link 
+                        to="/admin" 
+                        className="dropdown-item"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        Admin Panel
+                      </Link>
+                      <div className="dropdown-divider"></div>
+                    </>
+                  )}
                   <Link 
                     to="/profile" 
                     className="dropdown-item"
