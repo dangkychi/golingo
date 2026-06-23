@@ -39,3 +39,6 @@ backend/logs/
 # Coverage
 coverage/
 *.lcov
+
+# Agent AI
+.agents/
