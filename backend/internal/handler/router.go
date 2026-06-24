@@ -12,6 +12,8 @@ func SetupRouter(
 	userHandler *UserHandler,
 	storyHandler *StoryHandler,
 	adminHandler *AdminHandler,
+	vocabHandler *VocabularyHandler,
+	translateHandler *TranslateHandler,
 ) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -79,15 +81,16 @@ func SetupRouter(
 			{
 				users.PUT("/profile", userHandler.UpdateProfile)
 				users.PUT("/password", userHandler.UpdatePassword)
+				users.PUT("/settings", userHandler.UpdateSettings)
 			}
 
 			// Vocabulary
 			vocab := protected.Group("/vocabulary")
 			{
-				vocab.GET("", placeholderHandler("list_vocabulary"))
-				vocab.POST("", placeholderHandler("save_vocabulary"))
-				vocab.PUT("/:id", placeholderHandler("update_vocabulary"))
-				vocab.DELETE("/:id", placeholderHandler("delete_vocabulary"))
+				vocab.GET("", vocabHandler.List)
+				vocab.POST("", vocabHandler.Add)
+				vocab.PUT("/:id", vocabHandler.Update)
+				vocab.DELETE("/:id", vocabHandler.Delete)
 				vocab.GET("/due", placeholderHandler("due_vocabulary"))
 			}
 
@@ -116,6 +119,7 @@ func SetupRouter(
 			// AI features
 			ai := protected.Group("/ai")
 			{
+				ai.POST("/translate", translateHandler.Translate)
 				ai.POST("/explain", placeholderHandler("ai_explain"))
 				ai.POST("/summarize/:chapter_id", placeholderHandler("ai_summarize"))
 				ai.POST("/quiz/:chapter_id", placeholderHandler("ai_quiz"))

@@ -1,9 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../api/auth';
+import { vocabularyAPI } from '../api/vocabulary';
 import { useAuthStore } from '../store/authStore';
+import toast from 'react-hot-toast';
 import './Auth.css';
 import './Profile.css';
+
+const LANGUAGES = [
+  { code: 'vi', name: 'Tiếng Việt (Vietnamese)' },
+  { code: 'zh', name: '中文 (Chinese)' },
+  { code: 'ja', name: '日本語 (Japanese)' },
+  { code: 'ko', name: '한국어 (Korean)' },
+  { code: 'fr', name: 'Français (French)' },
+  { code: 'de', name: 'Deutsch (German)' },
+  { code: 'es', name: 'Español (Spanish)' },
+  { code: 'pt', name: 'Português (Portuguese)' },
+  { code: 'th', name: 'ไทย (Thai)' },
+  { code: 'id', name: 'Bahasa Indonesia (Indonesian)' },
+];
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -17,12 +32,17 @@ export default function Profile() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
+  // Translation settings state
+  const [targetLang, setTargetLang] = useState('vi');
+  const [settingsLoading, setSettingsLoading] = useState(false);
+
   useEffect(() => {
     if (user) {
       setProfileForm({
         username: user.username || '',
         avatar_url: user.avatar_url || '',
       });
+      setTargetLang(user.translate_target_lang || 'vi');
     }
   }, [user]);
 
@@ -37,9 +57,12 @@ export default function Profile() {
         avatar_url: profileForm.avatar_url || undefined,
       });
       setUser(data.user);
+      toast.success('Profile updated successfully!');
       setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err: any) {
-      setProfileMessage({ type: 'error', text: err.response?.data?.error || t('common.error') });
+      const errorMsg = err.response?.data?.error || t('common.error');
+      toast.error(errorMsg);
+      setProfileMessage({ type: 'error', text: errorMsg });
     } finally {
       setProfileLoading(false);
     }
@@ -50,11 +73,13 @@ export default function Profile() {
     setPasswordMessage({ type: '', text: '' });
 
     if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error(t('auth.password_mismatch'));
       setPasswordMessage({ type: 'error', text: t('auth.password_mismatch') });
       return;
     }
 
     if (passwordForm.new_password.length < 6) {
+      toast.error(t('auth.password_too_short'));
       setPasswordMessage({ type: 'error', text: t('auth.password_too_short') });
       return;
     }
@@ -65,12 +90,31 @@ export default function Profile() {
       await authAPI.updatePassword({
         new_password: passwordForm.new_password,
       });
+      toast.success('Password updated successfully!');
       setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
       setPasswordForm({ new_password: '', confirm_password: '' });
     } catch (err: any) {
-      setPasswordMessage({ type: 'error', text: err.response?.data?.error || t('common.error') });
+      const errorMsg = err.response?.data?.error || t('common.error');
+      toast.error(errorMsg);
+      setPasswordMessage({ type: 'error', text: errorMsg });
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+
+    try {
+      const { data } = await vocabularyAPI.updateSettings(targetLang);
+      setUser(data.user);
+      toast.success('Settings updated successfully!');
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Lỗi khi cập nhật cài đặt';
+      toast.error(errorMsg);
+    } finally {
+      setSettingsLoading(false);
     }
   };
 
@@ -117,6 +161,32 @@ export default function Profile() {
             </div>
             <button type="submit" className="btn btn-primary" disabled={profileLoading}>
               {profileLoading ? t('common.loading') : 'Update Profile'}
+            </button>
+          </form>
+        </div>
+
+        {/* Translation Settings Section */}
+        <div className="profile-section">
+          <h3>Translation Settings</h3>
+          <p className="settings-desc">Select your target language when translating stories.</p>
+          <form className="auth-form" onSubmit={handleSettingsSubmit}>
+            <div className="form-group">
+              <label className="form-label">Target Language</label>
+              <select
+                className="input select-input"
+                value={targetLang}
+                onChange={(e) => setTargetLang(e.target.value)}
+                disabled={settingsLoading}
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={settingsLoading}>
+              {settingsLoading ? t('common.loading') : 'Save Settings'}
             </button>
           </form>
         </div>

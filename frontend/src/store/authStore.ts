@@ -7,6 +7,7 @@ interface User {
   avatar_url?: string;
   role: string;
   totp_enabled: boolean;
+  translate_target_lang?: string;
 }
 
 interface AuthState {

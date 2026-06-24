@@ -38,11 +38,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
 		"user": gin.H{
-			"id":         user.ID,
-			"email":      user.Email,
-			"username":   user.Username,
-			"role":       user.Role,
-			"created_at": user.CreatedAt,
+			"id":                    user.ID,
+			"email":                 user.Email,
+			"username":              user.Username,
+			"role":                  user.Role,
+			"translate_target_lang": user.TranslateTargetLang,
+			"created_at":            user.CreatedAt,
 		},
 	})
 }
@@ -68,12 +69,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logged in successfully",
 		"user": gin.H{
-			"id":           user.ID,
-			"email":        user.Email,
-			"username":     user.Username,
-			"role":         user.Role,
-			"avatar_url":   user.AvatarURL,
-			"totp_enabled": user.TOTPEnabled,
+			"id":                    user.ID,
+			"email":                 user.Email,
+			"username":              user.Username,
+			"role":                  user.Role,
+			"avatar_url":            user.AvatarURL,
+			"totp_enabled":          user.TOTPEnabled,
+			"translate_target_lang": user.TranslateTargetLang,
 		},
 		"tokens": tokens,
 	})
@@ -99,12 +101,13 @@ func (h *AuthHandler) GoogleLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logged in with Google successfully",
 		"user": gin.H{
-			"id":           user.ID,
-			"email":        user.Email,
-			"username":     user.Username,
-			"role":         user.Role,
-			"avatar_url":   user.AvatarURL,
-			"totp_enabled": user.TOTPEnabled,
+			"id":                    user.ID,
+			"email":                 user.Email,
+			"username":              user.Username,
+			"role":                  user.Role,
+			"avatar_url":            user.AvatarURL,
+			"totp_enabled":          user.TOTPEnabled,
+			"translate_target_lang": user.TranslateTargetLang,
 		},
 		"tokens": tokens,
 	})
@@ -184,12 +187,13 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
-			"id":           user.ID,
-			"email":        user.Email,
-			"username":     user.Username,
-			"role":         user.Role,
-			"avatar_url":   user.AvatarURL,
-			"totp_enabled": user.TOTPEnabled,
+			"id":                    user.ID,
+			"email":                 user.Email,
+			"username":              user.Username,
+			"role":                  user.Role,
+			"avatar_url":            user.AvatarURL,
+			"totp_enabled":          user.TOTPEnabled,
+			"translate_target_lang": user.TranslateTargetLang,
 		},
 	})
 }

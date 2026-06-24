@@ -3,19 +3,22 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	App      AppConfig
-	DB       DBConfig
-	Redis    RedisConfig
-	JWT      JWTConfig
-	Google   GoogleConfig
-	OpenAI   OpenAIConfig
-	Frontend FrontendConfig
+	App       AppConfig
+	DB        DBConfig
+	Redis     RedisConfig
+	JWT       JWTConfig
+	Google    GoogleConfig
+	OpenAI    OpenAIConfig
+	Gemini    GeminiConfig
+	Translate TranslateConfig
+	Frontend  FrontendConfig
 }
 
 type AppConfig struct {
@@ -69,6 +72,14 @@ type OpenAIConfig struct {
 	APIKey string
 }
 
+type GeminiConfig struct {
+	APIKey string
+}
+
+type TranslateConfig struct {
+	MaxChars int
+}
+
 type FrontendConfig struct {
 	URL         string
 	CORSOrigins string
@@ -87,6 +98,11 @@ func Load() (*Config, error) {
 	refreshExpiry, err := time.ParseDuration(getEnv("JWT_REFRESH_EXPIRY", "168h"))
 	if err != nil {
 		refreshExpiry = 168 * time.Hour
+	}
+
+	maxChars, err := strconv.Atoi(getEnv("MAX_TRANSLATE_CHARS", "500"))
+	if err != nil {
+		maxChars = 500
 	}
 
 	cfg := &Config{
@@ -123,6 +139,12 @@ func Load() (*Config, error) {
 		},
 		OpenAI: OpenAIConfig{
 			APIKey: getEnv("OPENAI_API_KEY", ""),
+		},
+		Gemini: GeminiConfig{
+			APIKey: getEnv("GEMINI_API_KEY", ""),
+		},
+		Translate: TranslateConfig{
+			MaxChars: maxChars,
 		},
 		Frontend: FrontendConfig{
 			URL:         getEnv("FRONTEND_URL", "http://localhost:5173"),
