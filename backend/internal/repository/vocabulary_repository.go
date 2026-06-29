@@ -18,6 +18,7 @@ type VocabularyRepository interface {
 	List(ctx context.Context, userID uuid.UUID, search string, storyID *uuid.UUID, page, pageSize int) ([]domain.UserVocabulary, int64, error)
 	GetEntryByWord(ctx context.Context, word string) (*domain.VocabularyEntry, error)
 	CreateEntry(ctx context.Context, entry *domain.VocabularyEntry) error
+	GetDueCount(ctx context.Context, userID uuid.UUID) (int64, error)
 }
 
 type vocabularyRepository struct {
@@ -109,4 +110,15 @@ func (r *vocabularyRepository) GetEntryByWord(ctx context.Context, word string) 
 
 func (r *vocabularyRepository) CreateEntry(ctx context.Context, entry *domain.VocabularyEntry) error {
 	return r.db.WithContext(ctx).Create(entry).Error
+}
+
+func (r *vocabularyRepository) GetDueCount(ctx context.Context, userID uuid.UUID) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&domain.UserVocabulary{}).
+		Where("user_id = ? AND next_review_at <= NOW()", userID).
+		Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

@@ -73,3 +73,17 @@ type ReadingProgress struct {
 func (ReadingProgress) TableName() string {
 	return "reading_progress"
 }
+
+type ReadingProgressDetail struct {
+	StoryID              uuid.UUID  `json:"story_id"`
+	StoryTitle           string     `json:"story_title"`
+	StorySlug            string     `json:"story_slug"`
+	StoryCoverURL        *string    `json:"story_cover_url"`
+	StoryAuthor          *string    `json:"story_author"`
+	LastReadChapterID    uuid.UUID  `json:"last_read_chapter_id"`
+	LastReadChapterNum   int        `json:"last_read_chapter_num"`
+	LastReadChapterTitle *string    `json:"last_read_chapter_title"`
+	UpdatedAt            time.Time  `json:"updated_at"`
+	TotalChapters        int64      `json:"total_chapters"`
+}
+

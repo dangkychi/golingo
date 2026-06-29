@@ -93,6 +93,25 @@
   color: var(--neon-cyan);
 }
 
+.nav-label-with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-due-badge {
+  background: var(--neon-magenta);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: var(--radius-full, 9999px);
+  min-width: 14px;
+  text-align: center;
+  box-shadow: 0 0 6px var(--neon-magenta);
+  line-height: 1.2;
+}
+
 /* Actions */
 .navbar-actions {
   display: flex;

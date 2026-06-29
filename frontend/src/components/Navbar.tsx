@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../api/auth';
+import { flashcardAPI } from '../api/flashcard';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -12,6 +13,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const [dueCount, setDueCount] = useState(0);
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -27,6 +29,24 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setDueCount(0);
+      return;
+    }
+    
+    const fetchDueCount = async () => {
+      try {
+        const { data } = await flashcardAPI.getDueCount();
+        setDueCount(data.due_count || 0);
+      } catch (err) {
+        console.error('Failed to fetch due count', err);
+      }
+    };
+
+    fetchDueCount();
+  }, [isAuthenticated, location.pathname]);
 
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem('refresh_token');
@@ -47,8 +67,16 @@ export default function Navbar() {
     ...(isAuthenticated
       ? [
           { to: '/vocabulary', label: t('nav.vocabulary') },
-          { to: '/flashcard', label: t('nav.flashcard') },
-          { to: '/progress', label: t('nav.progress') },
+          { 
+            to: '/flashcard', 
+            label: (
+              <span className="nav-label-with-badge">
+                {t('nav.flashcard')}
+                {dueCount > 0 && <span className="nav-due-badge">{dueCount}</span>}
+              </span>
+            )
+          },
+          { to: '/dashboard', label: t('nav.progress') },
         ]
       : []),
   ];

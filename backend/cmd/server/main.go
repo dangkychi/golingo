@@ -59,6 +59,8 @@ func main() {
 	chapterRepo := repository.NewChapterRepository(db)
 	genreRepo := repository.NewGenreRepository(db)
 	vocabRepo := repository.NewVocabularyRepository(db)
+	flashcardRepo := repository.NewFlashcardRepository(db)
+	progressRepo := repository.NewProgressRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
@@ -66,6 +68,8 @@ func main() {
 	storyService := service.NewStoryService(storyRepo, chapterRepo, genreRepo)
 	vocabService := service.NewVocabularyService(vocabRepo)
 	translateService := service.NewTranslateService(cfg)
+	flashcardService := service.NewFlashcardService(flashcardRepo, vocabRepo, cfg.Flashcard.SessionLimit)
+	progressService := service.NewProgressService(progressRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -74,9 +78,21 @@ func main() {
 	adminHandler := handler.NewAdminHandler(userRepo, storyRepo, chapterRepo)
 	vocabHandler := handler.NewVocabularyHandler(vocabService)
 	translateHandler := handler.NewTranslateHandler(translateService, userService)
+	flashcardHandler := handler.NewFlashcardHandler(flashcardService)
+	progressHandler := handler.NewProgressHandler(progressService)
 
 	// Setup router
-	router := handler.SetupRouter(cfg, authHandler, userHandler, storyHandler, adminHandler, vocabHandler, translateHandler)
+	router := handler.SetupRouter(
+		cfg,
+		authHandler,
+		userHandler,
+		storyHandler,
+		adminHandler,
+		vocabHandler,
+		translateHandler,
+		flashcardHandler,
+		progressHandler,
+	)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.App.Port)

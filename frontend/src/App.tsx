@@ -13,6 +13,8 @@ import Profile from './pages/Profile';
 import StoryDetail from './pages/StoryDetail';
 import ChapterReader from './pages/ChapterReader';
 import Vocabulary from './pages/Vocabulary';
+import Flashcard from './pages/Flashcard';
+import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
 // Admin Imports
@@ -80,6 +82,8 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
+          <Route path="/flashcard" element={<Flashcard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
