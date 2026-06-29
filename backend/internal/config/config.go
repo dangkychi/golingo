@@ -18,6 +18,7 @@ type Config struct {
 	OpenAI    OpenAIConfig
 	Gemini    GeminiConfig
 	Translate TranslateConfig
+	Flashcard FlashcardConfig
 	Frontend  FrontendConfig
 }
 
@@ -80,6 +81,10 @@ type TranslateConfig struct {
 	MaxChars int
 }
 
+type FlashcardConfig struct {
+	SessionLimit int
+}
+
 type FrontendConfig struct {
 	URL         string
 	CORSOrigins string
@@ -103,6 +108,11 @@ func Load() (*Config, error) {
 	maxChars, err := strconv.Atoi(getEnv("MAX_TRANSLATE_CHARS", "500"))
 	if err != nil {
 		maxChars = 500
+	}
+
+	sessionLimit, err := strconv.Atoi(getEnv("FLASHCARD_SESSION_LIMIT", "50"))
+	if err != nil {
+		sessionLimit = 50
 	}
 
 	cfg := &Config{
@@ -145,6 +155,9 @@ func Load() (*Config, error) {
 		},
 		Translate: TranslateConfig{
 			MaxChars: maxChars,
+		},
+		Flashcard: FlashcardConfig{
+			SessionLimit: sessionLimit,
 		},
 		Frontend: FrontendConfig{
 			URL:         getEnv("FRONTEND_URL", "http://localhost:5173"),

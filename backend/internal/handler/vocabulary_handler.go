@@ -183,3 +183,34 @@ func (h *VocabularyHandler) List(c *gin.Context) {
 		"page_size":  pageSize,
 	})
 }
+
+func (h *VocabularyHandler) GetDueCount(c *gin.Context) {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var userID uuid.UUID
+	switch v := userIDVal.(type) {
+	case string:
+		var err error
+		userID, err = uuid.Parse(v)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id"})
+			return
+		}
+	case uuid.UUID:
+		userID = v
+	}
+
+	count, err := h.vocabService.GetDueCount(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"due_count": count,
+	})
+}

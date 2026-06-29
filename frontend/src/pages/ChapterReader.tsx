@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { storiesAPI, type Chapter } from '../api/stories';
 import { vocabularyAPI } from '../api/vocabulary';
+import { progressAPI } from '../api/progress';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import { Languages, BookMarked, X } from 'lucide-react';
@@ -46,10 +47,15 @@ export default function ChapterReader() {
         setChapter(data.chapter);
         setStoryInfo(data.story);
         setTotalChapters(data.total_chapters);
+        if (user) {
+          progressAPI.saveReadingProgress(data.story.id, data.chapter.id).catch((err) => {
+            console.error('Failed to save reading progress', err);
+          });
+        }
       })
       .catch(() => setChapter(null))
       .finally(() => setLoading(false));
-  }, [slug, num, chapterNum]);
+  }, [slug, num, chapterNum, user]);
 
   // Close tooltip when clicking elsewhere
   useEffect(() => {

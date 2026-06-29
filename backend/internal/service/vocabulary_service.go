@@ -17,6 +17,7 @@ type VocabularyService interface {
 	UpdateVocabulary(ctx context.Context, id uuid.UUID, userID uuid.UUID, translation *string, userNote *string) (*domain.UserVocabulary, error)
 	DeleteVocabulary(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 	ListVocabulary(ctx context.Context, userID uuid.UUID, search string, storyID *uuid.UUID, page, pageSize int) ([]domain.UserVocabulary, int64, error)
+	GetDueCount(ctx context.Context, userID uuid.UUID) (int64, error)
 }
 
 type vocabularyService struct {
@@ -93,7 +94,7 @@ func (s *vocabularyService) AddWord(ctx context.Context, userID uuid.UUID, word,
 		EaseFactor:      2.5,
 		IntervalDays:    1,
 		Repetitions:     0,
-		NextReviewAt:    now.Add(24 * time.Hour), // 1 day initial interval
+		NextReviewAt:    now, // Due immediately for initial learning
 		CreatedAt:       now,
 		UpdatedAt:       now,
 	}
@@ -146,4 +147,8 @@ func (s *vocabularyService) DeleteVocabulary(ctx context.Context, id uuid.UUID, 
 
 func (s *vocabularyService) ListVocabulary(ctx context.Context, userID uuid.UUID, search string, storyID *uuid.UUID, page, pageSize int) ([]domain.UserVocabulary, int64, error) {
 	return s.vocabRepo.List(ctx, userID, search, storyID, page, pageSize)
+}
+
+func (s *vocabularyService) GetDueCount(ctx context.Context, userID uuid.UUID) (int64, error) {
+	return s.vocabRepo.GetDueCount(ctx, userID)
 }

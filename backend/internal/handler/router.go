@@ -14,6 +14,8 @@ func SetupRouter(
 	adminHandler *AdminHandler,
 	vocabHandler *VocabularyHandler,
 	translateHandler *TranslateHandler,
+	flashcardHandler *FlashcardHandler,
+	progressHandler *ProgressHandler,
 ) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -91,29 +93,29 @@ func SetupRouter(
 				vocab.POST("", vocabHandler.Add)
 				vocab.PUT("/:id", vocabHandler.Update)
 				vocab.DELETE("/:id", vocabHandler.Delete)
-				vocab.GET("/due", placeholderHandler("due_vocabulary"))
+				vocab.GET("/due", vocabHandler.GetDueCount)
 			}
 
 			// Flashcard
 			flashcard := protected.Group("/flashcard")
 			{
-				flashcard.GET("/session", placeholderHandler("flashcard_session"))
-				flashcard.POST("/review", placeholderHandler("flashcard_review"))
-				flashcard.GET("/stats", placeholderHandler("flashcard_stats"))
+				flashcard.GET("/session", flashcardHandler.GetSession)
+				flashcard.POST("/review", flashcardHandler.SubmitReview)
+				flashcard.GET("/stats", flashcardHandler.GetStats)
 			}
 
 			// Progress
 			progress := protected.Group("/progress")
 			{
-				progress.GET("", placeholderHandler("get_progress"))
-				progress.GET("/streak", placeholderHandler("get_streak"))
+				progress.GET("", progressHandler.GetOverview)
+				progress.GET("/streak", progressHandler.GetStreak)
 			}
 
 			// Reading progress
 			reading := protected.Group("/reading")
 			{
-				reading.POST("/progress", placeholderHandler("save_reading_progress"))
-				reading.GET("/progress/:story_id", placeholderHandler("get_reading_progress"))
+				reading.POST("/progress", progressHandler.SaveProgress)
+				reading.GET("/progress/:story_id", progressHandler.GetProgress)
 			}
 
 			// AI features
