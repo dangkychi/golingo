@@ -4,6 +4,7 @@ import { authAPI } from '../api/auth';
 import { vocabularyAPI } from '../api/vocabulary';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import TwoFactorModal from '../components/TwoFactorModal';
 import './Auth.css';
 import './Profile.css';
 
@@ -35,6 +36,10 @@ export default function Profile() {
   // Translation settings state
   const [targetLang, setTargetLang] = useState('vi');
   const [settingsLoading, setSettingsLoading] = useState(false);
+
+  // 2FA state
+  const [is2faModalOpen, setIs2faModalOpen] = useState(false);
+  const [twofaAction, setTwofaAction] = useState<'enable' | 'disable'>('enable');
 
   useEffect(() => {
     if (user) {
@@ -230,7 +235,53 @@ export default function Profile() {
           </form>
         </div>
 
+        {/* Two-Factor Authentication Section */}
+        <div className="profile-section">
+          <h3>Two-Factor Authentication (2FA)</h3>
+          <p className="settings-desc">
+            Secure your account by requiring an authenticator code in addition to your password during login.
+          </p>
+          <div className="twofa-status-row">
+            <span className={`twofa-status-badge ${user.totp_enabled ? 'enabled' : 'disabled'}`}>
+              {user.totp_enabled ? 'Enabled' : 'Disabled'}
+            </span>
+            {user.totp_enabled ? (
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  setTwofaAction('disable');
+                  setIs2faModalOpen(true);
+                }}
+              >
+                Disable 2FA
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setTwofaAction('enable');
+                  setIs2faModalOpen(true);
+                }}
+              >
+                Enable 2FA
+              </button>
+            )}
+          </div>
+        </div>
+
       </div>
+
+      <TwoFactorModal
+        isOpen={is2faModalOpen}
+        action={twofaAction}
+        onClose={() => setIs2faModalOpen(false)}
+        onSuccess={() => {
+          const updatedUser = { ...user, totp_enabled: twofaAction === 'enable' };
+          setUser(updatedUser);
+        }}
+      />
     </div>
   );
 }

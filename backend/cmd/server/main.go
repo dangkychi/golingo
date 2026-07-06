@@ -8,6 +8,7 @@ import (
 	"github.com/dangkychi/GOLingo/internal/database"
 	"github.com/dangkychi/GOLingo/internal/handler"
 	"github.com/dangkychi/GOLingo/internal/pkg/logger"
+	"github.com/dangkychi/GOLingo/internal/pkg/mail"
 	"github.com/dangkychi/GOLingo/internal/repository"
 	"github.com/dangkychi/GOLingo/internal/service"
 	"go.uber.org/zap"
@@ -63,13 +64,15 @@ func main() {
 	progressRepo := repository.NewProgressRepository(db)
 
 	// Initialize services
-	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
+	mailer := mail.NewMailer(cfg.SMTP, cfg.Frontend)
+	authService := service.NewAuthService(cfg, userRepo, tokenRepo, mailer)
 	userService := service.NewUserService(userRepo)
 	storyService := service.NewStoryService(storyRepo, chapterRepo, genreRepo)
 	vocabService := service.NewVocabularyService(vocabRepo)
 	translateService := service.NewTranslateService(cfg)
 	flashcardService := service.NewFlashcardService(flashcardRepo, vocabRepo, cfg.Flashcard.SessionLimit)
 	progressService := service.NewProgressService(progressRepo)
+	aiService := service.NewAIService(cfg)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -80,6 +83,7 @@ func main() {
 	translateHandler := handler.NewTranslateHandler(translateService, userService)
 	flashcardHandler := handler.NewFlashcardHandler(flashcardService)
 	progressHandler := handler.NewProgressHandler(progressService)
+	aiHandler := handler.NewAIHandler(aiService, authService, chapterRepo)
 
 	// Setup router
 	router := handler.SetupRouter(
@@ -92,6 +96,7 @@ func main() {
 		translateHandler,
 		flashcardHandler,
 		progressHandler,
+		aiHandler,
 	)
 
 	// Start server

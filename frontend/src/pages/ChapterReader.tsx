@@ -3,9 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { storiesAPI, type Chapter } from '../api/stories';
 import { vocabularyAPI } from '../api/vocabulary';
 import { progressAPI } from '../api/progress';
+import { aiAPI, type QuizQuestion } from '../api/ai';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
-import { Languages, BookMarked, X } from 'lucide-react';
+import { Languages, BookMarked, X, Sparkles } from 'lucide-react';
 import './ChapterReader.css';
 
 export default function ChapterReader() {
@@ -22,12 +23,27 @@ export default function ChapterReader() {
   const [contextParagraph, setContextParagraph] = useState('');
   const [selectionCoords, setSelectionCoords] = useState<{ x: number; y: number } | null>(null);
   
-  // Modal states
+  // Translation Modal states
   const [showModal, setShowModal] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationText, setTranslationText] = useState('');
   const [userNote, setUserNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Sliding AI Assistant Drawer states
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTitle, setDrawerTitle] = useState('');
+  const [drawerContent, setDrawerContent] = useState('');
+  const [drawerLoading, setDrawerLoading] = useState(false);
+
+  // Interactive Quiz states
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
+  const [hasSubmittedAnswer, setHasSubmittedAnswer] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
 
   const maxCharsLimit = 500;
   const chapterNum = parseInt(num || '1', 10);
@@ -40,6 +56,8 @@ export default function ChapterReader() {
     // Reset selection state
     setSelectedText('');
     setSelectionCoords(null);
+    setDrawerOpen(false);
+    setShowQuizModal(false);
 
     storiesAPI
       .getChapter(slug, chapterNum)
@@ -130,6 +148,90 @@ export default function ChapterReader() {
       });
   };
 
+  const handleExplainAction = async () => {
+    setDrawerTitle('Giải thích cấu trúc & ngữ pháp');
+    setDrawerContent('');
+    setDrawerLoading(true);
+    setDrawerOpen(true);
+
+    // Clear selection tooltip
+    window.getSelection()?.removeAllRanges();
+    setSelectedText('');
+    setSelectionCoords(null);
+
+    try {
+      const { data } = await aiAPI.explain(selectedText, contextParagraph);
+      setDrawerContent(data.explanation);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Không thể kết nối dịch vụ AI giải thích';
+      toast.error(errorMsg);
+      setDrawerContent(errorMsg);
+    } finally {
+      setDrawerLoading(false);
+    }
+  };
+
+  const handleSummarizeAction = async () => {
+    if (!chapter) return;
+    setDrawerTitle('Tóm tắt chương');
+    setDrawerContent('');
+    setDrawerLoading(true);
+    setDrawerOpen(true);
+
+    try {
+      const { data } = await aiAPI.summarize(chapter.id);
+      setDrawerContent(data.summary);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Không thể tạo bản tóm tắt chương';
+      toast.error(errorMsg);
+      setDrawerContent(errorMsg);
+    } finally {
+      setDrawerLoading(false);
+    }
+  };
+
+  const handleStartQuiz = async () => {
+    if (!chapter) return;
+    setShowQuizModal(true);
+    setQuizLoading(true);
+    setQuizQuestions([]);
+    setCurrentQuestionIndex(0);
+    setSelectedOptionIndex(null);
+    setHasSubmittedAnswer(false);
+    setQuizScore(0);
+
+    try {
+      const { data } = await aiAPI.quiz(chapter.id);
+      setQuizQuestions(data);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Không thể tạo câu hỏi trắc nghiệm';
+      toast.error(errorMsg);
+      setShowQuizModal(false);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleSelectOption = (index: number) => {
+    if (hasSubmittedAnswer) return;
+    setSelectedOptionIndex(index);
+  };
+
+  const handleSubmitAnswer = () => {
+    if (selectedOptionIndex === null || hasSubmittedAnswer) return;
+    setHasSubmittedAnswer(true);
+    const question = quizQuestions[currentQuestionIndex];
+    if (selectedOptionIndex === question.correct_index) {
+      setQuizScore((prev) => prev + 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    setSelectedOptionIndex(null);
+    setHasSubmittedAnswer(false);
+    setCurrentQuestionIndex((prev) => prev + 1);
+  };
+
   const handleSaveVocabulary = () => {
     if (!selectedText) return;
     setIsSaving(true);
@@ -160,6 +262,39 @@ export default function ChapterReader() {
       .finally(() => {
         setIsSaving(false);
       });
+  };
+
+  const parseMarkdown = (text: string) => {
+    if (!text) return null;
+
+    const parseBold = (rawLine: string) => {
+      const parts = rawLine.split(/(\*\*.*?\*\*)/);
+      return parts.map((part, idx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={idx}>{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+    };
+
+    return text.split('\n').map((line, i) => {
+      if (line.startsWith('### ')) {
+        return <h4 key={i} className="markdown-h3">{parseBold(line.slice(4))}</h4>;
+      }
+      if (line.startsWith('## ')) {
+        return <h3 key={i} className="markdown-h2">{parseBold(line.slice(3))}</h3>;
+      }
+      if (line.startsWith('# ')) {
+        return <h2 key={i} className="markdown-h1">{parseBold(line.slice(2))}</h2>;
+      }
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        return <li key={i} className="markdown-li">{parseBold(line.slice(2))}</li>;
+      }
+      if (line.trim() === '') {
+        return <div key={i} className="markdown-spacer" />;
+      }
+      return <p key={i} className="markdown-p">{parseBold(line)}</p>;
+    });
   };
 
   if (loading) {
@@ -206,6 +341,19 @@ export default function ChapterReader() {
           <p className="reader-word-count">
             {chapter.word_count?.toLocaleString()} words
           </p>
+
+          {user && (
+            <div className="reader-ai-actions animate-fade-in">
+              <button className="reader-ai-btn" onClick={handleSummarizeAction}>
+                <Sparkles size={14} />
+                <span>Tóm tắt chương</span>
+              </button>
+              <button className="reader-ai-btn" onClick={handleStartQuiz}>
+                <Sparkles size={14} />
+                <span>Làm Quiz ôn tập</span>
+              </button>
+            </div>
+          )}
         </header>
 
         <div className="reader-content" onMouseUp={handleSelection} onTouchEnd={handleSelection}>
@@ -241,7 +389,7 @@ export default function ChapterReader() {
       {/* Floating Translate Tooltip */}
       {selectionCoords && selectedText && (
         <div
-          className={`translate-tooltip ${selectedText.length > maxCharsLimit ? 'tooltip-warning' : ''}`}
+          className="translate-tooltip-container"
           style={{
             left: `${selectionCoords.x}px`,
             top: `${selectionCoords.y}px`,
@@ -251,23 +399,41 @@ export default function ChapterReader() {
             e.preventDefault();
             e.stopPropagation();
           }}
-          onClick={() => {
-            if (selectedText.length > maxCharsLimit) {
-              toast.error(`Vượt giới hạn ${selectedText.length}/${maxCharsLimit} ký tự, vui lòng thu hẹp khoanh vùng!`);
-              return;
-            }
-            if (!user) {
-              toast.error('Vui lòng đăng nhập để sử dụng tính năng dịch và lưu từ vựng!');
-              return;
-            }
-            handleTranslateAction();
-          }}
         >
-          <Languages size={14} />
           {selectedText.length > maxCharsLimit ? (
-            <span>Vượt giới hạn {selectedText.length}/{maxCharsLimit} ký tự</span>
+            <div className="tooltip-warn-msg">
+              Vượt giới hạn {selectedText.length}/{maxCharsLimit} ký tự
+            </div>
           ) : (
-            <span>Dịch với AI</span>
+            <>
+              <button
+                className="tooltip-btn"
+                onClick={() => {
+                  if (!user) {
+                    toast.error('Vui lòng đăng nhập để sử dụng tính năng dịch!');
+                    return;
+                  }
+                  handleTranslateAction();
+                }}
+              >
+                <Languages size={13} />
+                <span>Dịch nghĩa</span>
+              </button>
+              <div className="tooltip-divider" />
+              <button
+                className="tooltip-btn"
+                onClick={() => {
+                  if (!user) {
+                    toast.error('Vui lòng đăng nhập để sử dụng tính năng giải thích!');
+                    return;
+                  }
+                  handleExplainAction();
+                }}
+              >
+                <Sparkles size={13} />
+                <span>Giải thích</span>
+              </button>
+            </>
           )}
         </div>
       )}
@@ -348,6 +514,137 @@ export default function ChapterReader() {
               >
                 {isSaving ? 'Đang lưu...' : 'Lưu vào từ vựng'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sliding AI Assistant Drawer */}
+      {drawerOpen && (
+        <div className="drawer-overlay" onClick={() => setDrawerOpen(false)}>
+          <div className="drawer-content animate-slide-left" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <h3>{drawerTitle}</h3>
+              <button className="drawer-close-btn" onClick={() => setDrawerOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="drawer-body">
+              {drawerLoading ? (
+                <div className="drawer-loading">
+                  <div className="translate-spinner"></div>
+                  <span>AI đang phân tích và chuẩn bị phản hồi...</span>
+                </div>
+              ) : (
+                <div className="drawer-text-content">
+                  {parseMarkdown(drawerContent)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Quiz Modal */}
+      {showQuizModal && (
+        <div className="quiz-modal-backdrop" onClick={() => setShowQuizModal(false)}>
+          <div className="quiz-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="quiz-modal-header">
+              <h3>💡 Luyện tập ôn tập chương</h3>
+              <button className="quiz-modal-close" onClick={() => setShowQuizModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="quiz-modal-body">
+              {quizLoading ? (
+                <div className="quiz-loading-box">
+                  <div className="translate-spinner"></div>
+                  <span>Gemini đang soạn câu hỏi trắc nghiệm dựa trên nội dung chương...</span>
+                </div>
+              ) : quizQuestions.length === 0 ? (
+                <p className="quiz-empty-message">Không có câu hỏi nào được tạo ra cho chương này.</p>
+              ) : currentQuestionIndex < quizQuestions.length ? (
+                <div className="quiz-question-container">
+                  <div className="quiz-progress-bar-wrapper">
+                    <div 
+                      className="quiz-progress-bar" 
+                      style={{ width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
+                    />
+                  </div>
+                  <div className="quiz-question-header">
+                    <span>Câu hỏi {currentQuestionIndex + 1} / {quizQuestions.length}</span>
+                  </div>
+                  <h4 className="quiz-question-text">
+                    {quizQuestions[currentQuestionIndex].question}
+                  </h4>
+                  <div className="quiz-options-list">
+                    {quizQuestions[currentQuestionIndex].options.map((option, index) => {
+                      let optionClass = 'quiz-option';
+                      if (selectedOptionIndex === index) {
+                        optionClass += ' selected';
+                      }
+                      if (hasSubmittedAnswer) {
+                        if (index === quizQuestions[currentQuestionIndex].correct_index) {
+                          optionClass += ' correct';
+                        } else if (selectedOptionIndex === index) {
+                          optionClass += ' incorrect';
+                        }
+                      }
+                      return (
+                        <button
+                          key={index}
+                          className={optionClass}
+                          onClick={() => handleSelectOption(index)}
+                          disabled={hasSubmittedAnswer}
+                        >
+                          <span className="option-letter">{String.fromCharCode(65 + index)}.</span>
+                          <span className="option-text">{option}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  {hasSubmittedAnswer && (
+                    <div className="quiz-explanation-box">
+                      <span className="explanation-title">Giải thích từ Gemini:</span>
+                      <p>{quizQuestions[currentQuestionIndex].explanation}</p>
+                    </div>
+                  )}
+                  
+                  <div className="quiz-footer-actions">
+                    {!hasSubmittedAnswer ? (
+                      <button
+                        className="btn btn-primary"
+                        disabled={selectedOptionIndex === null}
+                        onClick={handleSubmitAnswer}
+                      >
+                        Trả lời
+                      </button>
+                    ) : (
+                      <button className="btn btn-primary" onClick={handleNextQuestion}>
+                        {currentQuestionIndex === quizQuestions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="quiz-results-container">
+                  <div className="quiz-result-score-circle">
+                    <span className="score-num">{quizScore}</span>
+                    <span className="score-total">/ {quizQuestions.length}</span>
+                  </div>
+                  <h4 className="quiz-result-title">Hoàn thành bài luyện tập!</h4>
+                  <p className="quiz-result-desc">
+                    {quizScore === quizQuestions.length 
+                      ? 'Tuyệt vời! Bạn đã trả lời đúng tất cả câu hỏi.'
+                      : 'Hãy luyện tập thêm để ghi nhớ từ vựng và cấu trúc tốt hơn.'}
+                  </p>
+                  <button className="btn btn-primary" onClick={() => setShowQuizModal(false)}>
+                    Đóng
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

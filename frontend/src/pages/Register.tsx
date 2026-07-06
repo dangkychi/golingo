@@ -54,7 +54,11 @@ export default function Register() {
 
     try {
       const { data } = await authAPI.googleLogin(response.credential);
-      login(data.user, data.tokens.access_token, data.tokens.refresh_token);
+      if (data.requires_2fa) {
+        navigate('/login', { state: { requiresOTP: true, preAuthToken: data.pre_auth_token } });
+        return;
+      }
+      login(data.user!, data.tokens!.access_token, data.tokens!.refresh_token);
       navigate('/');
     } catch (err: any) {
       const message = err.response?.data?.error || t('common.error');

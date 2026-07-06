@@ -16,6 +16,7 @@ func SetupRouter(
 	translateHandler *TranslateHandler,
 	flashcardHandler *FlashcardHandler,
 	progressHandler *ProgressHandler,
+	aiHandler *AIHandler,
 ) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -45,8 +46,9 @@ func SetupRouter(
 			auth.POST("/google", authHandler.GoogleLogin)
 			auth.POST("/refresh", authHandler.Refresh)
 			auth.POST("/logout", authHandler.Logout)
-			auth.POST("/forgot-password", placeholderHandler("forgot_password"))
-			auth.POST("/reset-password", placeholderHandler("reset_password"))
+			auth.POST("/forgot-password", authHandler.ForgotPassword)
+			auth.POST("/reset-password", authHandler.ResetPassword)
+			auth.POST("/2fa/login", authHandler.Login2FA)
 			
 			// Protected auth route
 			auth.GET("/me", middleware.AuthMiddleware(cfg), authHandler.GetMe)
@@ -56,9 +58,9 @@ func SetupRouter(
 		twofa := v1.Group("/auth/2fa")
 		twofa.Use(middleware.AuthMiddleware(cfg))
 		{
-			twofa.POST("/enable", placeholderHandler("2fa_enable"))
-			twofa.POST("/verify", placeholderHandler("2fa_verify"))
-			twofa.POST("/disable", placeholderHandler("2fa_disable"))
+			twofa.POST("/setup", authHandler.Setup2FA)
+			twofa.POST("/enable", authHandler.Enable2FA)
+			twofa.POST("/disable", authHandler.Disable2FA)
 		}
 
 		// Stories routes (public with optional auth)
@@ -119,12 +121,12 @@ func SetupRouter(
 			}
 
 			// AI features
-			ai := protected.Group("/ai")
+			aiGroup := protected.Group("/ai")
 			{
-				ai.POST("/translate", translateHandler.Translate)
-				ai.POST("/explain", placeholderHandler("ai_explain"))
-				ai.POST("/summarize/:chapter_id", placeholderHandler("ai_summarize"))
-				ai.POST("/quiz/:chapter_id", placeholderHandler("ai_quiz"))
+				aiGroup.POST("/translate", translateHandler.Translate)
+				aiGroup.POST("/explain", aiHandler.Explain)
+				aiGroup.POST("/summarize/:chapter_id", aiHandler.Summarize)
+				aiGroup.POST("/quiz/:chapter_id", aiHandler.Quiz)
 			}
 		}
 
