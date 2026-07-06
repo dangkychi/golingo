@@ -21,7 +21,7 @@ type TranslateService struct {
 func NewTranslateService(cfg *config.Config) *TranslateService {
 	return &TranslateService{
 		cfg:    cfg.Translate,
-		apiKey: cfg.Gemini.APIKey,
+		apiKey: cfg.Gemini.TranslationAPIKey,
 	}
 }
 

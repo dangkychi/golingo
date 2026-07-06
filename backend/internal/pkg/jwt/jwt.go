@@ -102,3 +102,25 @@ func ValidateRefreshToken(tokenString string, secret string) (uuid.UUID, error) 
 
 	return userID, nil
 }
+
+func GeneratePreAuthToken(userID uuid.UUID, secret string, expiry time.Duration) (string, error) {
+	expiresAt := time.Now().Add(expiry)
+	claims := TokenClaims{
+		UserID: userID,
+		Role:   "pre-auth",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "golingo",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", fmt.Errorf("failed to sign pre-auth token: %w", err)
+	}
+
+	return tokenString, nil
+}
+

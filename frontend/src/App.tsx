@@ -10,6 +10,8 @@ import Stories from './pages/Stories';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import StoryDetail from './pages/StoryDetail';
 import ChapterReader from './pages/ChapterReader';
 import Vocabulary from './pages/Vocabulary';
@@ -80,6 +82,8 @@ function AppContent() {
           <Route path="/stories/:slug/chapters/:num" element={<ChapterReader />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
           <Route path="/flashcard" element={<Flashcard />} />

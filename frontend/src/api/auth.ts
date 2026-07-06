@@ -42,8 +42,10 @@ export interface RegisterResponse {
 
 export interface LoginResponse {
   message: string;
-  user: AuthUser;
-  tokens: TokenPair;
+  requires_2fa?: boolean;
+  pre_auth_token?: string;
+  user?: AuthUser;
+  tokens?: TokenPair;
 }
 
 export const authAPI = {
@@ -55,6 +57,24 @@ export const authAPI = {
 
   googleLogin: (token: string) =>
     apiClient.post<LoginResponse>('/auth/google', { token }),
+
+  login2FA: (preAuthToken: string, code: string) =>
+    apiClient.post<LoginResponse>('/auth/2fa/login', { pre_auth_token: preAuthToken, code }),
+
+  forgotPassword: (email: string) =>
+    apiClient.post<{ message: string }>('/auth/forgot-password', { email }),
+
+  resetPassword: (payload: { token: string; new_password: string }) =>
+    apiClient.post<{ message: string }>('/auth/reset-password', payload),
+
+  setup2FA: () =>
+    apiClient.post<{ secret: string; qr_code_url: string }>('/auth/2fa/setup'),
+
+  enable2FA: (code: string) =>
+    apiClient.post<{ message: string }>('/auth/2fa/enable', { code }),
+
+  disable2FA: (code: string) =>
+    apiClient.post<{ message: string }>('/auth/2fa/disable', { code }),
 
   logout: (refreshToken: string) =>
     apiClient.post('/auth/logout', { refresh_token: refreshToken }),

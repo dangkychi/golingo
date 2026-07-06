@@ -25,6 +25,8 @@ type User struct {
 	TOTPSecret   *string   `json:"-" gorm:"size:255"`
 	TOTPEnabled  bool      `json:"totp_enabled" gorm:"not null;default:false"`
 	IsActive            bool      `json:"is_active" gorm:"not null;default:true"`
+	PasswordResetToken     *string    `json:"-" gorm:"size:255"`
+	PasswordResetExpiresAt *time.Time `json:"-"`
 	TranslateTargetLang string    `json:"translate_target_lang" gorm:"size:10;not null;default:'vi'"`
 	CreatedAt           time.Time `json:"created_at" gorm:"not null;default:now()"`
 	UpdatedAt           time.Time `json:"updated_at" gorm:"not null;default:now()"`

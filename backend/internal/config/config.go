@@ -20,6 +20,15 @@ type Config struct {
 	Translate TranslateConfig
 	Flashcard FlashcardConfig
 	Frontend  FrontendConfig
+	SMTP      SMTPConfig
+}
+
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	Sender   string
 }
 
 type AppConfig struct {
@@ -74,7 +83,8 @@ type OpenAIConfig struct {
 }
 
 type GeminiConfig struct {
-	APIKey string
+	APIKey            string
+	TranslationAPIKey string
 }
 
 type TranslateConfig struct {
@@ -115,6 +125,11 @@ func Load() (*Config, error) {
 		sessionLimit = 50
 	}
 
+	smtpPort, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
+	if err != nil {
+		smtpPort = 587
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Env:         getEnv("APP_ENV", "development"),
@@ -151,7 +166,8 @@ func Load() (*Config, error) {
 			APIKey: getEnv("OPENAI_API_KEY", ""),
 		},
 		Gemini: GeminiConfig{
-			APIKey: getEnv("GEMINI_API_KEY", ""),
+			APIKey:            getEnv("GEMINI_API_KEY", ""),
+			TranslationAPIKey: getEnv("GEMINI_TRANSLATION_API_KEY", ""),
 		},
 		Translate: TranslateConfig{
 			MaxChars: maxChars,
@@ -162,6 +178,13 @@ func Load() (*Config, error) {
 		Frontend: FrontendConfig{
 			URL:         getEnv("FRONTEND_URL", "http://localhost:5173"),
 			CORSOrigins: getEnv("CORS_ORIGINS", "http://localhost:5173"),
+		},
+		SMTP: SMTPConfig{
+			Host:     getEnv("SMTP_HOST", ""),
+			Port:     smtpPort,
+			Username: getEnv("SMTP_USERNAME", ""),
+			Password: getEnv("SMTP_PASSWORD", ""),
+			Sender:   getEnv("SMTP_SENDER", ""),
 		},
 	}
 
