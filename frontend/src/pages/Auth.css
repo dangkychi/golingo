@@ -78,3 +78,32 @@
   75% { transform: translateX(6px); }
 }
 
+.otp-group {
+  margin: var(--space-4) 0 var(--space-6);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.otp-input-field {
+  width: 100%;
+  max-width: 220px;
+  background: var(--surface-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-2xl);
+  letter-spacing: 0.5em;
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-weight: 700;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.otp-input-field:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+

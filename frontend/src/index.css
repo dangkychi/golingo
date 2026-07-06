@@ -2,7 +2,7 @@
    GOLingo Design System
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 /* ── CSS Reset ── */
 *,
@@ -56,9 +56,9 @@
   --space-20: 5rem;
 
   /* Typography */
-  --font-brand: 'Bebas Neue', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-brand: 'Quicksand', sans-serif;
+  --font-heading: 'Quicksand', sans-serif;
+  --font-body: 'Quicksand', sans-serif;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -98,28 +98,46 @@
 /* ── Default Theme (Dark) ── */
 :root,
 [data-theme="dark"] {
-  --bg-primary: #111827;
-  --bg-secondary: #1F2937;
-  --bg-tertiary: #374151;
-  --bg-card: #1F2937;
-  --bg-card-hover: #374151;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-primary: #131318;
+  --bg-secondary: #1b1b20;
+  --bg-tertiary: #1f1f25;
+  --bg-card: #1b1b20;
+  --bg-card-hover: #1f1f25;
+  --bg-overlay: rgba(14, 14, 19, 0.8);
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #9CA3AF;
-  --text-tertiary: #6B7280;
-  --text-inverse: #111827;
+  --text-primary: #e4e1e9;
+  --text-secondary: #b9caca;
+  --text-tertiary: #849495;
+  --text-inverse: #131318;
 
-  --border-primary: rgba(0, 229, 255, 0.15); /* Subtle Neon Cyan border */
-  --border-secondary: #374151;
+  --border-primary: rgba(0, 245, 255, 0.15); /* Neon Cyan border */
+  --border-secondary: #3a494a;
 
-  --surface-glass: rgba(31, 41, 55, 0.6);
-  --surface-hover: rgba(55, 65, 81, 0.6);
+  --surface-glass: rgba(31, 31, 37, 0.6);
+  --surface-hover: rgba(53, 52, 58, 0.6);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 15px rgba(0, 229, 255, 0.2);
+  --shadow-glow: 0 0 15px rgba(0, 245, 255, 0.3);
+
+  /* Cyber-Linguistic Energy Neon Color Tokens */
+  --neon-cyan: #00f5ff;
+  --neon-magenta: #ff4b89;
+  --neon-lime: #ccff00;
+
+  --primary-300: #63f7ff;
+  --primary-400: #00f5ff;
+  --primary-500: #00dce5;
+  --primary-600: #006c71;
+
+  --accent-400: #ffd9e0;
+  --accent-500: #ff4b89;
+  --accent-600: #8f0041;
+
+  --success-400: #c3f400;
+  --success-500: #bfef00;
+  --success-600: #3c4d00;
 }
 
 /* ── Light Theme Override ── */

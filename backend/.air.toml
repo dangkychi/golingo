@@ -10,7 +10,7 @@ tmp_dir = "tmp"
   # Binary output
   bin = "tmp/main.exe"
   # Watch these file extensions
-  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_ext = ["go", "tpl", "tmpl", "html", "env"]
   # Exclude directories from watching
   exclude_dir = ["assets", "tmp", "vendor", "node_modules", "logs"]
   # Exclude files

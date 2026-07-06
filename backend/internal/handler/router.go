@@ -12,6 +12,11 @@ func SetupRouter(
 	userHandler *UserHandler,
 	storyHandler *StoryHandler,
 	adminHandler *AdminHandler,
+	vocabHandler *VocabularyHandler,
+	translateHandler *TranslateHandler,
+	flashcardHandler *FlashcardHandler,
+	progressHandler *ProgressHandler,
+	aiHandler *AIHandler,
 ) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -41,8 +46,9 @@ func SetupRouter(
 			auth.POST("/google", authHandler.GoogleLogin)
 			auth.POST("/refresh", authHandler.Refresh)
 			auth.POST("/logout", authHandler.Logout)
-			auth.POST("/forgot-password", placeholderHandler("forgot_password"))
-			auth.POST("/reset-password", placeholderHandler("reset_password"))
+			auth.POST("/forgot-password", authHandler.ForgotPassword)
+			auth.POST("/reset-password", authHandler.ResetPassword)
+			auth.POST("/2fa/login", authHandler.Login2FA)
 			
 			// Protected auth route
 			auth.GET("/me", middleware.AuthMiddleware(cfg), authHandler.GetMe)
@@ -52,9 +58,9 @@ func SetupRouter(
 		twofa := v1.Group("/auth/2fa")
 		twofa.Use(middleware.AuthMiddleware(cfg))
 		{
-			twofa.POST("/enable", placeholderHandler("2fa_enable"))
-			twofa.POST("/verify", placeholderHandler("2fa_verify"))
-			twofa.POST("/disable", placeholderHandler("2fa_disable"))
+			twofa.POST("/setup", authHandler.Setup2FA)
+			twofa.POST("/enable", authHandler.Enable2FA)
+			twofa.POST("/disable", authHandler.Disable2FA)
 		}
 
 		// Stories routes (public with optional auth)
@@ -79,46 +85,48 @@ func SetupRouter(
 			{
 				users.PUT("/profile", userHandler.UpdateProfile)
 				users.PUT("/password", userHandler.UpdatePassword)
+				users.PUT("/settings", userHandler.UpdateSettings)
 			}
 
 			// Vocabulary
 			vocab := protected.Group("/vocabulary")
 			{
-				vocab.GET("", placeholderHandler("list_vocabulary"))
-				vocab.POST("", placeholderHandler("save_vocabulary"))
-				vocab.PUT("/:id", placeholderHandler("update_vocabulary"))
-				vocab.DELETE("/:id", placeholderHandler("delete_vocabulary"))
-				vocab.GET("/due", placeholderHandler("due_vocabulary"))
+				vocab.GET("", vocabHandler.List)
+				vocab.POST("", vocabHandler.Add)
+				vocab.PUT("/:id", vocabHandler.Update)
+				vocab.DELETE("/:id", vocabHandler.Delete)
+				vocab.GET("/due", vocabHandler.GetDueCount)
 			}
 
 			// Flashcard
 			flashcard := protected.Group("/flashcard")
 			{
-				flashcard.GET("/session", placeholderHandler("flashcard_session"))
-				flashcard.POST("/review", placeholderHandler("flashcard_review"))
-				flashcard.GET("/stats", placeholderHandler("flashcard_stats"))
+				flashcard.GET("/session", flashcardHandler.GetSession)
+				flashcard.POST("/review", flashcardHandler.SubmitReview)
+				flashcard.GET("/stats", flashcardHandler.GetStats)
 			}
 
 			// Progress
 			progress := protected.Group("/progress")
 			{
-				progress.GET("", placeholderHandler("get_progress"))
-				progress.GET("/streak", placeholderHandler("get_streak"))
+				progress.GET("", progressHandler.GetOverview)
+				progress.GET("/streak", progressHandler.GetStreak)
 			}
 
 			// Reading progress
 			reading := protected.Group("/reading")
 			{
-				reading.POST("/progress", placeholderHandler("save_reading_progress"))
-				reading.GET("/progress/:story_id", placeholderHandler("get_reading_progress"))
+				reading.POST("/progress", progressHandler.SaveProgress)
+				reading.GET("/progress/:story_id", progressHandler.GetProgress)
 			}
 
 			// AI features
-			ai := protected.Group("/ai")
+			aiGroup := protected.Group("/ai")
 			{
-				ai.POST("/explain", placeholderHandler("ai_explain"))
-				ai.POST("/summarize/:chapter_id", placeholderHandler("ai_summarize"))
-				ai.POST("/quiz/:chapter_id", placeholderHandler("ai_quiz"))
+				aiGroup.POST("/translate", translateHandler.Translate)
+				aiGroup.POST("/explain", aiHandler.Explain)
+				aiGroup.POST("/summarize/:chapter_id", aiHandler.Summarize)
+				aiGroup.POST("/quiz/:chapter_id", aiHandler.Quiz)
 			}
 		}
 

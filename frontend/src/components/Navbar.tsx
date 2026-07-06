@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../store/uiStore';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../api/auth';
+import { flashcardAPI } from '../api/flashcard';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -12,6 +13,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const [dueCount, setDueCount] = useState(0);
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -28,10 +30,23 @@ export default function Navbar() {
     };
   }, []);
 
-  const toggleLanguage = () => {
-    const next = i18n.language === 'en' ? 'vi' : 'en';
-    i18n.changeLanguage(next);
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setDueCount(0);
+      return;
+    }
+    
+    const fetchDueCount = async () => {
+      try {
+        const { data } = await flashcardAPI.getDueCount();
+        setDueCount(data.due_count || 0);
+      } catch (err) {
+        console.error('Failed to fetch due count', err);
+      }
+    };
+
+    fetchDueCount();
+  }, [isAuthenticated, location.pathname]);
 
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem('refresh_token');
@@ -52,8 +67,16 @@ export default function Navbar() {
     ...(isAuthenticated
       ? [
           { to: '/vocabulary', label: t('nav.vocabulary') },
-          { to: '/flashcard', label: t('nav.flashcard') },
-          { to: '/progress', label: t('nav.progress') },
+          { 
+            to: '/flashcard', 
+            label: (
+              <span className="nav-label-with-badge">
+                {t('nav.flashcard')}
+                {dueCount > 0 && <span className="nav-due-badge">{dueCount}</span>}
+              </span>
+            )
+          },
+          { to: '/dashboard', label: t('nav.progress') },
         ]
       : []),
   ];
@@ -63,8 +86,10 @@ export default function Navbar() {
       <div className="navbar-inner container">
         {/* Logo */}
         <Link to="/" className="navbar-logo" id="navbar-logo">
-          <span className="logo-icon">📖</span>
-          <span className="logo-text">GOLingo</span>
+          <div className="logo-icon-container">
+            <span className="material-symbols-outlined logo-icon">translate</span>
+          </div>
+          <span className="logo-text">Golingo</span>
         </Link>
 
         {/* Nav Links */}
@@ -73,7 +98,7 @@ export default function Navbar() {
             <Link
               key={link.to}
               to={link.to}
-              className={`navbar-link ${location.pathname === link.to ? 'active' : ''}`}
+              className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
             >
               {link.label}
             </Link>
@@ -82,25 +107,35 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="navbar-actions" id="navbar-actions">
-          {/* Language toggle */}
-          <button
-            className="navbar-icon-btn"
-            onClick={toggleLanguage}
-            title={i18n.language === 'en' ? 'Tiếng Việt' : 'English'}
-            id="lang-toggle"
-          >
-            {i18n.language === 'en' ? '🇻🇳' : '🇺🇸'}
-          </button>
+          {/* Language Switcher */}
+          <div className="navbar-lang-selector" id="lang-toggle">
+            <button
+              className={`lang-btn ${i18n.language === 'vi' || i18n.language.startsWith('vi') ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('vi')}
+            >
+              VI
+            </button>
+            <button
+              className={`lang-btn ${i18n.language === 'en' || i18n.language.startsWith('en') ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('en')}
+            >
+              EN
+            </button>
+          </div>
 
-          {/* Theme toggle */}
+          {/* Theme Toggle */}
           <button
-            className="navbar-icon-btn"
+            className="navbar-theme-btn"
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
             id="theme-toggle"
           >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            <span className="material-symbols-outlined">
+              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
           </button>
+
+          <div className="navbar-divider"></div>
 
           {/* Auth */}
           {isAuthenticated ? (
@@ -156,10 +191,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="navbar-auth">
-              <Link to="/login" className="btn btn-ghost btn-sm" id="login-btn">
+              <Link to="/login" className="btn-login" id="login-btn">
                 {t('nav.login')}
               </Link>
-              <Link to="/register" className="btn btn-primary btn-sm" id="register-btn">
+              <Link to="/register" className="btn-neon-primary" id="register-btn">
                 {t('nav.register')}
               </Link>
             </div>

@@ -3,19 +3,32 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	App      AppConfig
-	DB       DBConfig
-	Redis    RedisConfig
-	JWT      JWTConfig
-	Google   GoogleConfig
-	OpenAI   OpenAIConfig
-	Frontend FrontendConfig
+	App       AppConfig
+	DB        DBConfig
+	Redis     RedisConfig
+	JWT       JWTConfig
+	Google    GoogleConfig
+	OpenAI    OpenAIConfig
+	Gemini    GeminiConfig
+	Translate TranslateConfig
+	Flashcard FlashcardConfig
+	Frontend  FrontendConfig
+	SMTP      SMTPConfig
+}
+
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	Sender   string
 }
 
 type AppConfig struct {
@@ -69,6 +82,19 @@ type OpenAIConfig struct {
 	APIKey string
 }
 
+type GeminiConfig struct {
+	APIKey            string
+	TranslationAPIKey string
+}
+
+type TranslateConfig struct {
+	MaxChars int
+}
+
+type FlashcardConfig struct {
+	SessionLimit int
+}
+
 type FrontendConfig struct {
 	URL         string
 	CORSOrigins string
@@ -87,6 +113,21 @@ func Load() (*Config, error) {
 	refreshExpiry, err := time.ParseDuration(getEnv("JWT_REFRESH_EXPIRY", "168h"))
 	if err != nil {
 		refreshExpiry = 168 * time.Hour
+	}
+
+	maxChars, err := strconv.Atoi(getEnv("MAX_TRANSLATE_CHARS", "500"))
+	if err != nil {
+		maxChars = 500
+	}
+
+	sessionLimit, err := strconv.Atoi(getEnv("FLASHCARD_SESSION_LIMIT", "50"))
+	if err != nil {
+		sessionLimit = 50
+	}
+
+	smtpPort, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
+	if err != nil {
+		smtpPort = 587
 	}
 
 	cfg := &Config{
@@ -124,9 +165,26 @@ func Load() (*Config, error) {
 		OpenAI: OpenAIConfig{
 			APIKey: getEnv("OPENAI_API_KEY", ""),
 		},
+		Gemini: GeminiConfig{
+			APIKey:            getEnv("GEMINI_API_KEY", ""),
+			TranslationAPIKey: getEnv("GEMINI_TRANSLATION_API_KEY", ""),
+		},
+		Translate: TranslateConfig{
+			MaxChars: maxChars,
+		},
+		Flashcard: FlashcardConfig{
+			SessionLimit: sessionLimit,
+		},
 		Frontend: FrontendConfig{
 			URL:         getEnv("FRONTEND_URL", "http://localhost:5173"),
 			CORSOrigins: getEnv("CORS_ORIGINS", "http://localhost:5173"),
+		},
+		SMTP: SMTPConfig{
+			Host:     getEnv("SMTP_HOST", ""),
+			Port:     smtpPort,
+			Username: getEnv("SMTP_USERNAME", ""),
+			Password: getEnv("SMTP_PASSWORD", ""),
+			Sender:   getEnv("SMTP_SENDER", ""),
 		},
 	}
 

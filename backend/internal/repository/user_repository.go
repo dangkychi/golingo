@@ -16,6 +16,7 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 	CountAll(ctx context.Context) (int64, error)
 	ListAll(ctx context.Context, search string, page, pageSize int) ([]domain.User, int64, error)
+	GetByPasswordResetToken(ctx context.Context, token string) (*domain.User, error)
 }
 
 type userRepository struct {
@@ -94,3 +95,12 @@ func (r *userRepository) ListAll(ctx context.Context, search string, page, pageS
 
 	return users, total, nil
 }
+
+func (r *userRepository) GetByPasswordResetToken(ctx context.Context, token string) (*domain.User, error) {
+	var user domain.User
+	if err := r.db.WithContext(ctx).First(&user, "password_reset_token = ?", token).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+

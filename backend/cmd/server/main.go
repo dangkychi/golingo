@@ -8,6 +8,7 @@ import (
 	"github.com/dangkychi/GOLingo/internal/database"
 	"github.com/dangkychi/GOLingo/internal/handler"
 	"github.com/dangkychi/GOLingo/internal/pkg/logger"
+	"github.com/dangkychi/GOLingo/internal/pkg/mail"
 	"github.com/dangkychi/GOLingo/internal/repository"
 	"github.com/dangkychi/GOLingo/internal/service"
 	"go.uber.org/zap"
@@ -58,20 +59,45 @@ func main() {
 	storyRepo := repository.NewStoryRepository(db)
 	chapterRepo := repository.NewChapterRepository(db)
 	genreRepo := repository.NewGenreRepository(db)
+	vocabRepo := repository.NewVocabularyRepository(db)
+	flashcardRepo := repository.NewFlashcardRepository(db)
+	progressRepo := repository.NewProgressRepository(db)
 
 	// Initialize services
-	authService := service.NewAuthService(cfg, userRepo, tokenRepo)
+	mailer := mail.NewMailer(cfg.SMTP, cfg.Frontend)
+	authService := service.NewAuthService(cfg, userRepo, tokenRepo, mailer)
 	userService := service.NewUserService(userRepo)
 	storyService := service.NewStoryService(storyRepo, chapterRepo, genreRepo)
+	vocabService := service.NewVocabularyService(vocabRepo)
+	translateService := service.NewTranslateService(cfg)
+	flashcardService := service.NewFlashcardService(flashcardRepo, vocabRepo, cfg.Flashcard.SessionLimit)
+	progressService := service.NewProgressService(progressRepo)
+	aiService := service.NewAIService(cfg)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	storyHandler := handler.NewStoryHandler(storyService)
 	adminHandler := handler.NewAdminHandler(userRepo, storyRepo, chapterRepo)
+	vocabHandler := handler.NewVocabularyHandler(vocabService)
+	translateHandler := handler.NewTranslateHandler(translateService, userService)
+	flashcardHandler := handler.NewFlashcardHandler(flashcardService)
+	progressHandler := handler.NewProgressHandler(progressService)
+	aiHandler := handler.NewAIHandler(aiService, authService, chapterRepo)
 
 	// Setup router
-	router := handler.SetupRouter(cfg, authHandler, userHandler, storyHandler, adminHandler)
+	router := handler.SetupRouter(
+		cfg,
+		authHandler,
+		userHandler,
+		storyHandler,
+		adminHandler,
+		vocabHandler,
+		translateHandler,
+		flashcardHandler,
+		progressHandler,
+		aiHandler,
+	)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.App.Port)
@@ -82,6 +108,7 @@ func main() {
 		zap.String("api", fmt.Sprintf("http://localhost:%s/api/v1", cfg.App.Port)),
 	)
 
+	// Trigger air hot-reload to load updated root .env file variables
 	if err := router.Run(addr); err != nil {
 		appLogger.Fatal("Failed to start server", zap.Error(err))
 	}

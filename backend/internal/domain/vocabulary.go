@@ -21,6 +21,8 @@ type UserVocabulary struct {
 	UserID          uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
 	EntryID         *uuid.UUID `json:"entry_id" gorm:"type:uuid"`
 	Word            string     `json:"word" gorm:"size:255;not null"`
+	SelectedText    string     `json:"selected_text" gorm:"type:text;not null;default:''"`
+	Translation     *string    `json:"translation" gorm:"type:text"`
 	ContextSentence *string    `json:"context_sentence" gorm:"type:text"`
 	UserNote        *string    `json:"user_note" gorm:"type:text"`
 	ChapterID       *uuid.UUID `json:"chapter_id" gorm:"type:uuid"`
@@ -39,6 +41,10 @@ type UserVocabulary struct {
 	Entry   *VocabularyEntry `json:"entry,omitempty" gorm:"foreignKey:EntryID"`
 	Chapter *Chapter         `json:"-" gorm:"foreignKey:ChapterID"`
 	Story   *Story           `json:"-" gorm:"foreignKey:StoryID"`
+}
+
+func (UserVocabulary) TableName() string {
+	return "user_vocabulary"
 }
 
 type FlashcardReview struct {
@@ -63,3 +69,21 @@ type ReadingProgress struct {
 	Story   Story   `json:"-" gorm:"foreignKey:StoryID;constraint:OnDelete:CASCADE"`
 	Chapter Chapter `json:"-" gorm:"foreignKey:ChapterID"`
 }
+
+func (ReadingProgress) TableName() string {
+	return "reading_progress"
+}
+
+type ReadingProgressDetail struct {
+	StoryID              uuid.UUID  `json:"story_id"`
+	StoryTitle           string     `json:"story_title"`
+	StorySlug            string     `json:"story_slug"`
+	StoryCoverURL        *string    `json:"story_cover_url"`
+	StoryAuthor          *string    `json:"story_author"`
+	LastReadChapterID    uuid.UUID  `json:"last_read_chapter_id"`
+	LastReadChapterNum   int        `json:"last_read_chapter_num"`
+	LastReadChapterTitle *string    `json:"last_read_chapter_title"`
+	UpdatedAt            time.Time  `json:"updated_at"`
+	TotalChapters        int64      `json:"total_chapters"`
+}
+

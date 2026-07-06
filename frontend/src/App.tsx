@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 import './i18n';
 import Navbar from './components/Navbar';
@@ -9,8 +10,13 @@ import Stories from './pages/Stories';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import StoryDetail from './pages/StoryDetail';
 import ChapterReader from './pages/ChapterReader';
+import Vocabulary from './pages/Vocabulary';
+import Flashcard from './pages/Flashcard';
+import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
 // Admin Imports
@@ -76,7 +82,12 @@ function AppContent() {
           <Route path="/stories/:slug/chapters/:num" element={<ChapterReader />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/vocabulary" element={<Vocabulary />} />
+          <Route path="/flashcard" element={<Flashcard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -92,6 +103,18 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: 'rgba(10, 10, 15, 0.95)',
+            color: '#fff',
+            border: '1px solid var(--neon-cyan, #00f0ff)',
+            boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)',
+            fontFamily: "'Quicksand', sans-serif",
+          }
+        }} 
+      />
     </BrowserRouter>
   );
 }
